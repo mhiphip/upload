@@ -18,6 +18,21 @@
 // Import all of Bootstrap's CSS
 
 
+$white: #ffffff;
+
+$theme-colors: (
+    "light":      #d7eafb,
+    "dark":       #242aae,
+    "primary":    #c80558,
+    "secondary":  #ffb353,
+    "info":       #c6f7df,
+    "accent1":    #0072f4,
+    "accent2":    #54b4f2,
+    "accent3":    #e4f89d,
+    "success":    #00cd91,
+    "warning":    #dddc00,
+    "danger":     #f04800,
+);
 @import 'bootstrap/scss/bootstrap';
 
 body {
