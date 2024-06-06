@@ -12,6 +12,7 @@
     <!-- App CSS -->  
 <link href="https://unpkg.com/bootstrap-table@1.22.4/dist/bootstrap-table.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-table@1.22.4/dist/extensions/group-by-v2/bootstrap-table-group-by.css" rel="stylesheet">
+
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.0.0/css/flag-icons.min.css"/>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.css">
  <!-- css --> 
@@ -12187,6 +12188,11 @@ text-align: center !important;
 }
 
 // loading
+.bootstrap-table .fixed-table-container .fixed-table-body { 
+overflow: hidden; 
+position: relative;
+ }
+ 
 .fixed-table-body {
       overflow: auto auto;
       height: 100%;
@@ -12222,6 +12228,7 @@ text-align: center !important;
  vertical-align: -.125em;
  fill: currentColor;
 }
+
 </style>     
  <!-- /css --> 
  
@@ -12571,7 +12578,7 @@ text-align: center !important;
                     <div class="app-card mb-4 shadow h-100" id="table1-card">
                         <div class="app-card-body">                           	                 <div class="" id="toolbar1">                                     
 	                 </div>          
-	                         <div class="table main" style="table-layout:fixed;">                                     
+	                         <div class="table main" style="table-layout: fixed;">                                     
 	                        <table id="table1">
 	                        </table>
 	                       </div>                                                      
@@ -12588,8 +12595,10 @@ text-align: center !important;
 <script src="https://cdn.jsdelivr.net/npm/jquery/dist/jquery.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 <script src="https://kit.fontawesome.com/a2d5e8fc8a.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/perfect-scrollbar@1.5.5/dist/perfect-scrollbar.min.js"></script> 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap-table@1.22.4/dist/bootstrap-table.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap-table@1.22.4/dist/extensions/group-by-v2/bootstrap-table-group-by.min.js"></script>
+
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@3.0.0/dist/chart.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>    
@@ -12740,19 +12749,24 @@ return {"Date": moment(value).format("MM/DD/YYYY")}
 return {link: "https://crm.gearment.com/acp/?site=order&act=show&id="+value.replace("TW-00","")}}
 }];
 
+var ps;
 var columns = [{"title":"Provider","field":"Provider", visible: false, id: 2},{"title":"Carrier","field":"Carrier", "id": 3, type: "isSelect"},{"title":"Service","field":"Service", "id": 4},{"title":"Country","field":"Country", "id": 10, type: "isSelect", "format": true},{"title":"Zone","field":"Zone", "id": 9,  "format": true},{"title":"Billed Weight","field":"Billed Weight", "id": 7},{"title":"Actual Weight","field":"Actual Weight", "id": 8},{"title":"Shipping Cost","field":"Shipping Cost", "id": 5, "format": true, ftype: "currency"},{"title":"Shipment Date","field":"Shipment Date", "id": 11, "format": true, type: "isDate", ftype: "date"},{"title":"Tracking Number","field":"Tracking Number", "id": 1},{"title":"Order Name","field":"Order Name", "id": 0, "format": true}];
 columns = columns.map(col => col=_.extend(col, {formatter: (col.format==true)? function(value) {
-return value; } : undefined,
+return (this.ftype!=undefined) ?  format(value, this.ftype) : value; } : undefined,
 cellStyle: function(value, row, index) {
-return {css: {'max-width': '100%', "white-space": "normal"}}}
+return {classes: "cell", css: {"max-width": '30px', "white-space": "normal", "word-wrap": "break-word"}}}
 }));
 var tb1opts = {get data() {
 var source = this.source;
 var tdata = source.reduce((acc, it) => (f = fdata.reduce((ob, d) => (v = it[d.field], ob = (v!=undefined&&v!=null) ? _.extend(ob, d.format(it[d.field])) : ob, ob), {}), it = _.extend(it, f), acc.push(it), acc), []);
 return tdata;
 }, columns: columns, height: 500, oheight: 500, toolbar: "#toolbar1", search: true, searchable: true, groupBy: false, virtualScroll: true, 
-classes: "table table-sm app-table-hover text-left mb-0", headerStyle: function(column) {return {css: {"width": '50px', "white-space": "normal"}} }
-};
+classes: "table text-left mb-0", headerStyle: function(column) {return {css: {"width": '30px', "white-space": "normal", "word-wrap": "break-word"}} },
+onPostBody: function() {
+ if (ps) 
+ ps.destroy() 
+ ps = new window.PerfectScrollbar('.fixed-table-body');
+ }};
 
 // colFormat
 function detailFormat(value, row, i) {
@@ -12949,23 +12963,14 @@ break;
 return foptions;
 }
 
-fetch('https://drive.google.com/uc?export=download&id=1o3pckE8jAR_TRNUUZ-PCHPGB_WnlhIse')
-        .then(function(res) {
-        result.val(res);
+
+google.script.run.withSuccessHandler(function(res) {
 OpenLoading("close");
 tb1opts = _.extend(tb1opts, {source: res});
-table1.bootstrapTable("refreshOptions", tb1opts)
+table1.bootstrapTable("refreshOptions", tb1opts);
 .then(table1.trigger(action, [res]));
-});
-
-// google.script.run.withSuccessHandler(function(res) {
-// OpenLoading("close");
-// tb1opts = _.extend(tb1opts, {source: res});
-// table1.bootstrapTable("refreshOptions", tb1opts)
-// .then(table1.trigger(action, [res]));
- // }).Request(foptions);
- 
-}
+ }).Request(foptions);
+ }
 
 // EVENTS
 // table1: initial
@@ -13023,7 +13028,6 @@ fs = $(`:checkbox[name='${tg}']`);
 var sfs = fs.each(function() { 
 ($(this).val().includes(text)) ? $(this).parent().show() : $(this).parent().hide();
 });
-alert(sfs.length);
 break;
 
 case "filter":
