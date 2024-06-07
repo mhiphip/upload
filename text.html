@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title>Pivot: Compact Mode</title>
+		<!-- Webix Library -->
+		<script src="https://cdn.jsdelivr.net/npm/jquery/dist/jquery.min.js"></script>
+		<script type="text/javascript" src="pivot/codebase/webix/webix.js"></script>
+		<link
+			rel="stylesheet"
+			type="text/css"
+			href="pivot/codebase/webix/webix.css"
+		/>
+
+		<!-- pivot -->
+		<script type="text/javascript" src="pivot/codebase/pivot.js"></script>
+		<link rel="stylesheet" type="text/css" href="pivot/codebase/pivot.css" />
+	</head>
+	<div id="test">
+	jhgu
+	</div>
+
+
+	<body>
+		<script>
+		var test = $("#test");
+		$.get("pivot/samples/common/data.json",
+		function(data) { 
+		test.text(JSON.stringify(data));
+		});
+			webix.ready(function() {
+				// use custom scrolls, optional
+				webix.CustomScroll.init();
+				webix.ui({
+					cols: [
+						{
+							view: "pivot",
+							compact: true,
+							width: 540,
+							structure: {
+								rows: ["form", "name"],
+								columns: ["year"],
+								values: [{ name: "oil", operation: ["min", "sum"] }],
+							},
+							url: "pivot/samples/common/data.json",
+						},
+						{},
+					],
+				});
+			});
+		</script>
+	</body>
+</html>
