@@ -1,18 +1,19 @@
 
 
 <!doctype html>
-<html lang="en" data-bs-theme="light">
+<html lang="en" data-bs-theme="dark">
 <head>
 <base target="_top">
 <meta charset="utf-8">
  <meta name="viewport" content="width=device-width, initial-scale=1">
  
- <!-- css,script -->
+ <!-- css -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <!-- App CSS -->  
+    <!-- bootstrap-table -->  
 <link href="https://unpkg.com/bootstrap-table@1.22.4/dist/bootstrap-table.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-table@1.22.4/dist/extensions/group-by-v2/bootstrap-table-group-by.css" rel="stylesheet">
-
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-table@1.22.6/dist/extensions/sticky-header/bootstrap-table-sticky-header.css">
+    <!-- helper --> 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.0.0/css/flag-icons.min.css"/>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.css">
  <!-- css --> 
@@ -20828,35 +20829,34 @@ box-shadow: none !important;
       width: 100% !important;
       overflow-y: scroll;
 }
-   
-form {
-  display: inline-block;
-  width: auto !important;
-}
-    
-.input-group { 
-display: block !important; 
-}
-
-.form-control { 
-text-align: center !important;
-}
 
 .daterangepicker {
       color: inherit !important;
       background-color: inherit !important;
  }
 
- .modal-sheet .modal-dialog {
-   width: 380px;
-  transition: bottom .75s ease-in-out;
+// modal static
+#modal {
+      position:fixed;
+      left:50%;
+      top:50%;
+      transform:translate(-50%, -50%);
+      border:solid 1px #000;
+      background-color:inherit;
+      display:none;
+    }
+    
+#overlay {
+      position:fixed;
+      left:0;
+      top:0;
+      width:100vw;
+      height:100vh;
+      display:block;
+      opacity:0.5;
 }
 
-.modal-sheet .modal-footer {
-  padding-bottom: 2rem;
-}
-
-
+// loading
 .fixed-table-loading {
       align-items: center;
        background-color: transparent !important;
@@ -20876,17 +20876,10 @@ text-align: center !important;
       visibility: visible;
       opacity: 1;
  }
- 
- .bi {
-  display: inline-block;
-  width: 1rem;
-  height: 1rem;
-}
 
-.bi {
- vertical-align: -.125em;
- fill: currentColor;
-}
+.table-compact td {
+padding: 5px;
+} 
 
  .col-img {
   display: flex;
@@ -20908,14 +20901,6 @@ text-align: center !important;
   width: 100%;
 }
 
-.card-header {
-border-bottom:1px solid #e7e9ed;
-}
-
-.stats-figure {
-	   font-size: 0.75rem;
-	    color:var(--bs-info);
-	    }
 </style>     
  <!-- /css --> 
  
@@ -20924,29 +20909,26 @@ border-bottom:1px solid #e7e9ed;
 
 			    
 <!-- Modal -->
-    <div class="modal fade" id="modal" tabindex="-1" aria-labelledby="alert" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h1 class="modal-title fs-2" id="exampleModalLabel">Modal title</h1>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+<div id="overlay"></div>
+
+<div class="modal fade modal-borderless" id="modal" data-bs-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="modal" aria-hidden="true">
+<div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
+<div class="modal-content">
+   <div class="modal-header">
+       <h5 class="modal-title"></h5>
+       </div>
+     <div class="modal-body">
+     Loading...
+     <div class="progress">
+  <div class="progress-bar progress-bar-striped progress-bar-animated bg-info" id="loader" role="progressbar" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100" style="width: 20%"></div>
+</div>
+     </div>
+         <div class="modal-footer">
           </div>
-        </div>
-      </div>
-    </div>
-    
-<!-- Modal2 -->
-    <div class="modal fade" id="modal2" tabindex="-1" aria-labelledby="alert" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h1 class="modal-title fs-2" id="exampleModalLabel">Modal title</h1>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-        </div>
-      </div>
-    </div>
-    
+  </div>
+  </div>
+</div>
+      
    <!-- Content-->   
   <section class="container-fluid py-5" style="margin-top:30px;">
     
@@ -20959,79 +20941,17 @@ border-bottom:1px solid #e7e9ed;
   <!--ftoolbar-->
    <div id="ftoolbar" class="container-lg mb-4 main"> 
     </div>
-
-
-                <!-- Total Revenue -->
-                <div class="col-12 col-lg-12 mb-4">
-                  <div class="card">
-                    <div class="row row-bordered g-0">
-                      <div class="col-md-6">
-                        <h5 class="card-header m-0 me-2 pb-3">Total Revenue</h5>
-                        <div class="table main">
-	                        <table id="table5">
-	                        </table>                                    
-                            </div>
-                      </div>
-                      <div class="col-md-6">
-                        <div class="card-body">
-                          <div class="text-center">
-                            <div class="dropdown">
-                              <button
-                                class="btn btn-sm btn-outline-primary dropdown-toggle"
-                                type="button"
-                                id="growthReportId"
-                                data-bs-toggle="dropdown"
-                                aria-haspopup="true"
-                                aria-expanded="false">
-                                2022
-                              </button>
-                              <div class="dropdown-menu dropdown-menu-end" aria-labelledby="growthReportId">
-                                <a class="dropdown-item" href="javascript:void(0);">2021</a>
-                                <a class="dropdown-item" href="javascript:void(0);">2020</a>
-                                <a class="dropdown-item" href="javascript:void(0);">2019</a>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        <div id="growthChart"></div>
-                        <div class="text-center fw-medium pt-3 mb-2">62% Company Growth</div>
-
-                        <div class="d-flex px-xxl-4 px-lg-2 p-4 gap-xxl-3 gap-lg-1 gap-3 justify-content-between">
-                          <div class="d-flex">
-                            <div class="me-2">
-                              <span class="badge bg-label-primary p-2"><i class="bx bx-dollar text-primary"></i></span>
-                            </div>
-                            <div class="d-flex flex-column">
-                              <small>2022</small>
-                              <h6 class="mb-0">$32.5k</h6>
-                            </div>
-                          </div>
-                          <div class="d-flex">
-                            <div class="me-2">
-                              <span class="badge bg-label-info p-2"><i class="bx bx-wallet text-info"></i></span>
-                            </div>
-                            <div class="d-flex flex-column">
-                              <small>2021</small>
-                              <h6 class="mb-0">$41.2k</h6>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <!--/ Total Revenue -->
-                
                    
-                         <div class="row">
-              <!--chart2,table2-->   
+             <div class="row">
+              <!--chart2, table2-->   
           <div class="col-xl-6 col-sm-6 col-12 mb-4">               
                     <div class="card shadow h-100" id="table2-card">
-                    <div class="card-header p-3">
+                    <div class="card-header border-bottom p-3">
 			<div class="row justify-content-between align-items-center">
 			<div class="col-auto">
 			<div class="card-title">Domestic</div></div>
-			<div class="col-auto">                         <div id="toolbar2" class="d-flex justify-content-between flex-wrap align-items-center"></div>
+			<div class="col-auto">                         <div id="toolbar2" class="d-flex justify-content-between flex-wrap align-items-center">			
+			</div>
 			</div>
 			</div>
 			</div>
@@ -21043,7 +20963,7 @@ border-bottom:1px solid #e7e9ed;
                           <span>Total Orders</span>
                         </div>
                          <div class="me-2">
-                        <!--Chart2-->
+                        <!--chart2-->
 <div class="chart-container" style="position: relative; width: 100px;">
     <canvas id="chart2"></canvas>            
 </div>  
@@ -21064,7 +20984,8 @@ border-bottom:1px solid #e7e9ed;
                     <div class="card-header p-3">
 			<div class="row justify-content-between align-items-center">
 			<div class="col-auto">
-			<div class="card-title">International</div></div><!--//col-->
+			<div class="card-title">International</div>
+			</div>
 			<div class="col-auto">                         <div id="toolbar2" class="d-flex justify-content-between flex-wrap align-items-center"></div>
 			</div>
 			</div>
@@ -21098,46 +21019,81 @@ border-bottom:1px solid #e7e9ed;
 	          
             </div>
 
-    <!--chart4,table4-->
-          <div class="row">
-          <div class="col-xl-6 col-sm-6 col-12 mb-4">               
+    <!--chart4,5 table4,5-->
+                <div class="col-12 col-lg-12 mb-4">
                     <div class="card shadow h-100" id="table4-card">
+                    <div class="row row-bordered g-0">                    
+                      <div class="col-md-6">
+                      
                     <div class="card-header p-3">
 			<div class="row justify-content-between align-items-center">
 			<div class="col-auto">
-			<div class="card-title">International</div></div>
-			<div class="col-auto"><div class="card-header-action"><a href="charts.html">More charts</a></div>
+			<div class="card-title">International</div>
+			</div>
+			<div class="col-auto">                         <div id="toolbar4" class="d-flex justify-content-between flex-wrap align-items-center"></div>
 			</div>
 			</div>
 			</div>
 			
-                   <div class="card-body">       
-                        <div class="table main">
-	                        <table id="table4">
-	                        </table>                                    
+                        <div class="table">
+                        <table id="table4">
+	                  </table>
+                        </div>
+                      </div>
+                      <div class="col-md-6">
+                        <div class="card-body">
+                          <div class="text-center">
+                            <div class="dropdown">
+                              <button
+                                class="btn btn-sm btn-outline-primary dropdown-toggle"
+                                type="button"
+                                id="growthReportId"
+                                data-bs-toggle="dropdown"
+                                aria-haspopup="true"
+                                aria-expanded="false">
+                                2022
+                              </button>
+                              <div class="dropdown-menu dropdown-menu-end" aria-labelledby="growthReportId">
+                                <a class="dropdown-item" href="javascript:void(0);">2021</a>
+                                <a class="dropdown-item" href="javascript:void(0);">2020</a>
+                                <a class="dropdown-item" href="javascript:void(0);">2019</a>
+                              </div>
                             </div>
-                     </div>
+                          </div>
                         </div>
-                    </div>
-	    <!-- table5 -->
-          <div class="col-xl-6 col-sm-6 col-12 mb-4">               
-                    <div class="card shadow h-100" id="table5-card">
-                    <div class="card-header p-3">
-			<div class="row justify-content-between align-items-center">
-			<div class="col-auto">
-			<div class="card-title">International</div></div>
-			<div class="col-auto"><div class="card-header-action"><a href="charts.html">More charts</a></div>
-			</div>
-			</div>
-			</div>
-
-                   <div class="card-body">       
-
-                     </div>
+                          <div class="d-flex w-100 flex-wrap align-items-center justify-content-center gap-2">                                                
+                <div class="chart-container" style="position: relative;">
+    <canvas id="chart4"></canvas>            
+	        </div>  
+	              </div> 
+	              
+                        <div class="text-center fw-medium pt-3 mb-2">62% Company Growth</div>
+                       
+                        <div class="d-flex px-xxl-4 px-lg-2 p-4 gap-xxl-3 gap-lg-1 gap-3 justify-content-between">
+                          <div class="d-flex">
+                            <div class="me-2">
+                              <span class="badge bg-label-primary p-2"><i class="bx bx-dollar text-primary"></i></span>
+                            </div>
+                            <div class="d-flex flex-column">
+                              <small>2022</small>
+                              <h6 class="mb-0">$32.5k</h6>
+                            </div>
+                          </div>
+                          <div class="d-flex">
+                            <div class="me-2">
+                              <span class="badge bg-label-info p-2"><i class="bx bx-wallet text-info"></i></span>
+                            </div>
+                            <div class="d-flex flex-column">
+                              <small>2021</small>
+                              <h6 class="mb-0">$41.2k</h6>
+                            </div>
+                          </div>
                         </div>
+                      </div>
                     </div>
-	          </div>
-	          
+                  </div>
+                </div>
+                
             </div>
 
     <!-- Table1-->
@@ -21169,7 +21125,7 @@ border-bottom:1px solid #e7e9ed;
 <script src="https://cdn.jsdelivr.net/npm/perfect-scrollbar@1.5.5/dist/perfect-scrollbar.min.js"></script> 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap-table@1.22.4/dist/bootstrap-table.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap-table@1.22.4/dist/extensions/group-by-v2/bootstrap-table-group-by.min.js"></script>
-
+<script src="https://cdn.jsdelivr.net/npm/bootstrap-table@1.22.6/dist/extensions/sticky-header/bootstrap-table-sticky-header.min.js"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@3.0.0/dist/chart.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>    
@@ -21275,7 +21231,7 @@ var toolbar1 = $("#toolbar1");
 var table1 = $("#table1"); 
 var table2 = $("#table2"); var table3 = $("#table3");
 var chart2 = $("#chart2"); var chart3 = $("#chart3"); 
-var Data = {"data":{"fparams":{"default":[null,{"type":"date/all-options","value":"thismonth","id":"28c64a1","target":["dimension",["field",1025,null]]},{"type":"string/=","value":[],"id":"77ea5bfb","target":["dimension",["field",1020,null]]},{"type":"string/=","value":[],"id":"c03f6580","target":["dimension",["field",1022,null]]}],"columns":{"Carrier":"77ea5bfb","Country":"c03f6580","Shipment Date":"28c64a1"},"endpoint":"https://metabase.gearment.com/api/dashboard/43/dashcard/385/card/387/query/json","filter":{"Shipment Date":"thismonth"},"options":{"method":"POST","headers":{"Accept":"application/json","Content-Type":"application/json","X-Metabase-Session":"a1d8de9a-4397-4f95-b53b-1c27df6c6487"}},"params":[{"type":"date/all-options","value":"thismonth","id":"28c64a1","target":["dimension",["field",1025,null]]}],"url":"https://metabase.gearment.com/api/dashboard/43/dashcard/385/card/387/query/json?parameters=%5B%7B%22type%22%3A%22date%2Fall-options%22%2C%22value%22%3A%22thismonth%22%2C%22id%22%3A%2228c64a1%22%2C%22target%22%3A%5B%22dimension%22%2C%5B%22field%22%2C1025%2Cnull%5D%5D%7D%5D"},"columns":[{"name":"Carrier","label":"Carrier","value":"","values":[[""],["DHLECS"],["DHLGlobalMail"],["DHLGlobalmailInt"],["DhlEcs"],["FEDEX"],["FEDEXCROSSBORDER"],["FedEx"],["FedExCrossBorder"],["OSMWorldwide"],["UPS"],["USPS"]]},{"name":"Country","label":"Country","value":"","values":[[null],["Afghanistan"],["Albania"],["Algeria"],["American Samoa"],["Andorra"],["Angola"],["Anguilla"],["Argentina"],["Armenia"],["Aruba"],["Australia"],["Austria"],["Azerbaijan"],["Bahamas The"],["Bahrain"],["Bangladesh"],["Barbados"],["Belarus"],["Belgium"],["Belize"],["Bermuda"],["Bosnia and Herzegovina"],["Brazil"],["British Indian Ocean Territory"],["Bulgaria"],["Burkina Faso"],["Cambodia"],["Cameroon"],["Canada"],["Cape Verde"],["Chile"],["China"],["Colombia"],["Congo The Democratic Republic Of The"],["Costa Rica"],["Croatia (Hrvatska)"],["Cyprus"],["Czech Republic"],["Denmark"],["Djibouti"],["Dominican Republic"],["Ecuador"],["Egypt"],["El Salvador"],["Estonia"],["Ethiopia"],["Falkland Islands"],["Faroe Islands"],["Fiji Islands"],["Finland"],["France"],["French Polynesia"],["Gabon"],["Georgia"],["Germany"],["Ghana"],["Gibraltar"],["Greece"],["Greenland"],["Grenada"],["Guadeloupe"],["Guam"],["Guatemala"],["Guernsey"],["Guyana"],["Hong Kong S.A.R."],["Hungary"],["Iceland"],["India"],["Indonesia"],["Iraq"],["Ireland"],["Israel"],["Italy"],["Jamaica"],["Japan"],["Jersey"],["Jordan"],["Kazakhstan"],["Kenya"],["Korea South"],["Kuwait"],["Latvia"],["Lebanon"],["Liechtenstein"],["Lithuania"],["Luxembourg"],["Macau S.A.R."],["Macedonia"],["Malawi"],["Malaysia"],["Maldives"],["Malta"],["Man (Isle of)"],["Marshall Islands"],["Martinique"],["Mayotte"],["Mexico"],["Moldova"],["Monaco"],["Montenegro"],["Morocco"],["Mozambique"],["Namibia"],["Nepal"],["Netherlands"],["New Caledonia"],["New Zealand"],["Niger"],["Nigeria"],["Northern Mariana Islands"],["Norway"],["Oman"],["Pakistan"],["Palau"],["Panama"],["Papua new Guinea"],["Paraguay"],["Peru"],["Philippines"],["Poland"],["Portugal"],["Puerto Rico"],["Qatar"],["Reunion"],["Romania"],["Russia"],["Rwanda"],["Saint Lucia"],["Saint Pierre and Miquelon"],["Saudi Arabia"],["Serbia"],["Sierra Leone"],["Singapore"],["Slovakia"],["Slovenia"],["South Africa"],["Spain"],["Sri Lanka"],["Svalbard And Jan Mayen Islands"],["Swaziland"],["Sweden"],["Switzerland"],["Taiwan"],["Tanzania"],["Thailand"],["Togo"],["Turkey"],["Turks And Caicos Islands"],["Tuvalu"],["Uganda"],["Ukraine"],["United Arab Emirates"],["United Kingdom"],["United States"],["United States Minor Outlying Islands"],["Uruguay"],["Vanuatu"],["Vietnam"],["Virgin Islands (US)"],["Zambia"],["Zimbabwe"]]},{"name":"Shipment Date","label":"Date","text":"This Month","value":"6/1/24 - 6/6/24","values":false}],"fdata":{"url":"https://script.google.com/a/macros/gearment.com/s/AKfycby3gGAyjC0FyxoZ8y00Wt_zMJ1MDOhfPEv9fwpBQunt3CGv-6R96VoJHdR_5En1qepMbw/exec","params":{"func":"Request","params":{"default":[null,{"type":"date/all-options","value":"thismonth","id":"28c64a1","target":["dimension",["field",1025,null]]},{"type":"string/=","value":[],"id":"77ea5bfb","target":["dimension",["field",1020,null]]},{"type":"string/=","value":[],"id":"c03f6580","target":["dimension",["field",1022,null]]}],"columns":{"Carrier":"77ea5bfb","Country":"c03f6580","Shipment Date":"28c64a1"},"endpoint":"https://metabase.gearment.com/api/dashboard/43/dashcard/385/card/387/query/json","filter":{"Shipment Date":"thismonth"},"options":{"method":"POST","headers":{"Accept":"application/json","Content-Type":"application/json","X-Metabase-Session":"a1d8de9a-4397-4f95-b53b-1c27df6c6487"}},"params":[{"type":"date/all-options","value":"thismonth","id":"28c64a1","target":["dimension",["field",1025,null]]}],"url":"https://metabase.gearment.com/api/dashboard/43/dashcard/385/card/387/query/json?parameters=%5B%7B%22type%22%3A%22date%2Fall-options%22%2C%22value%22%3A%22thismonth%22%2C%22id%22%3A%2228c64a1%22%2C%22target%22%3A%5B%22dimension%22%2C%5B%22field%22%2C1025%2Cnull%5D%5D%7D%5D"}}},"url":"https://script.google.com/a/macros/gearment.com/s/AKfycby3gGAyjC0FyxoZ8y00Wt_zMJ1MDOhfPEv9fwpBQunt3CGv-6R96VoJHdR_5En1qepMbw/exec?func=Request&params=%7B%22default%22%3A%5Bnull%2C%7B%22type%22%3A%22date%2Fall-options%22%2C%22value%22%3A%22thismonth%22%2C%22id%22%3A%2228c64a1%22%2C%22target%22%3A%5B%22dimension%22%2C%5B%22field%22%2C1025%2Cnull%5D%5D%7D%2C%7B%22type%22%3A%22string%2F%3D%22%2C%22value%22%3A%5B%5D%2C%22id%22%3A%2277ea5bfb%22%2C%22target%22%3A%5B%22dimension%22%2C%5B%22field%22%2C1020%2Cnull%5D%5D%7D%2C%7B%22type%22%3A%22string%2F%3D%22%2C%22value%22%3A%5B%5D%2C%22id%22%3A%22c03f6580%22%2C%22target%22%3A%5B%22dimension%22%2C%5B%22field%22%2C1022%2Cnull%5D%5D%7D%5D%2C%22columns%22%3A%7B%22Carrier%22%3A%2277ea5bfb%22%2C%22Country%22%3A%22c03f6580%22%2C%22Shipment%20Date%22%3A%2228c64a1%22%7D%2C%22endpoint%22%3A%22https%3A%2F%2Fmetabase.gearment.com%2Fapi%2Fdashboard%2F43%2Fdashcard%2F385%2Fcard%2F387%2Fquery%2Fjson%22%2C%22filter%22%3A%7B%22Shipment%20Date%22%3A%22thismonth%22%7D%2C%22options%22%3A%7B%22method%22%3A%22POST%22%2C%22headers%22%3A%7B%22Accept%22%3A%22application%2Fjson%22%2C%22Content-Type%22%3A%22application%2Fjson%22%2C%22X-Metabase-Session%22%3A%22a1d8de9a-4397-4f95-b53b-1c27df6c6487%22%7D%7D%2C%22params%22%3A%5B%7B%22type%22%3A%22date%2Fall-options%22%2C%22value%22%3A%22thismonth%22%2C%22id%22%3A%2228c64a1%22%2C%22target%22%3A%5B%22dimension%22%2C%5B%22field%22%2C1025%2Cnull%5D%5D%7D%5D%2C%22url%22%3A%22https%3A%2F%2Fmetabase.gearment.com%2Fapi%2Fdashboard%2F43%2Fdashcard%2F385%2Fcard%2F387%2Fquery%2Fjson%3Fparameters%3D%255B%257B%2522type%2522%253A%2522date%252Fall-options%2522%252C%2522value%2522%253A%2522thismonth%2522%252C%2522id%2522%253A%252228c64a1%2522%252C%2522target%2522%253A%255B%2522dimension%2522%252C%255B%2522field%2522%252C1025%252Cnull%255D%255D%257D%255D%22%7D"},"countries":[{"capital":"Kabul","code":"af","continent":"Asia","flag_1x1":"flags/1x1/af.svg","flag_4x3":"flags/4x3/af.svg","iso":true,"name":"Afghanistan"},{"capital":"Mariehamn","code":"ax","continent":"Europe","flag_1x1":"flags/1x1/ax.svg","flag_4x3":"flags/4x3/ax.svg","iso":true,"name":"Aland Islands"},{"capital":"Tirana","code":"al","continent":"Europe","flag_1x1":"flags/1x1/al.svg","flag_4x3":"flags/4x3/al.svg","iso":true,"name":"Albania"},{"capital":"Algiers","code":"dz","continent":"Africa","flag_1x1":"flags/1x1/dz.svg","flag_4x3":"flags/4x3/dz.svg","iso":true,"name":"Algeria"},{"capital":"Pago Pago","code":"as","continent":"Oceania","flag_1x1":"flags/1x1/as.svg","flag_4x3":"flags/4x3/as.svg","iso":true,"name":"American Samoa"},{"capital":"Andorra la Vella","code":"ad","continent":"Europe","flag_1x1":"flags/1x1/ad.svg","flag_4x3":"flags/4x3/ad.svg","iso":true,"name":"Andorra"},{"capital":"Luanda","code":"ao","continent":"Africa","flag_1x1":"flags/1x1/ao.svg","flag_4x3":"flags/4x3/ao.svg","iso":true,"name":"Angola"},{"capital":"The Valley","code":"ai","continent":"North America","flag_1x1":"flags/1x1/ai.svg","flag_4x3":"flags/4x3/ai.svg","iso":true,"name":"Anguilla"},{"code":"aq","flag_1x1":"flags/1x1/aq.svg","flag_4x3":"flags/4x3/aq.svg","iso":true,"name":"Antarctica"},{"capital":"St. John's","code":"ag","continent":"North America","flag_1x1":"flags/1x1/ag.svg","flag_4x3":"flags/4x3/ag.svg","iso":true,"name":"Antigua and Barbuda"},{"capital":"Buenos Aires","code":"ar","continent":"South America","flag_1x1":"flags/1x1/ar.svg","flag_4x3":"flags/4x3/ar.svg","iso":true,"name":"Argentina"},{"capital":"Yerevan","code":"am","continent":"Asia","flag_1x1":"flags/1x1/am.svg","flag_4x3":"flags/4x3/am.svg","iso":true,"name":"Armenia"},{"capital":"Oranjestad","code":"aw","continent":"South America","flag_1x1":"flags/1x1/aw.svg","flag_4x3":"flags/4x3/aw.svg","iso":true,"name":"Aruba"},{"capital":"Georgetown","code":"sh-ac","continent":"Africa","flag_1x1":"flags/1x1/sh-ac.svg","flag_4x3":"flags/4x3/sh-ac.svg","iso":false,"name":"Ascension Island"},{"capital":"Canberra","code":"au","continent":"Oceania","flag_1x1":"flags/1x1/au.svg","flag_4x3":"flags/4x3/au.svg","iso":true,"name":"Australia"},{"capital":"Vienna","code":"at","continent":"Europe","flag_1x1":"flags/1x1/at.svg","flag_4x3":"flags/4x3/at.svg","iso":true,"name":"Austria"},{"capital":"Baku","code":"az","continent":"Asia","flag_1x1":"flags/1x1/az.svg","flag_4x3":"flags/4x3/az.svg","iso":true,"name":"Azerbaijan"},{"capital":"Nassau","code":"bs","continent":"North America","flag_1x1":"flags/1x1/bs.svg","flag_4x3":"flags/4x3/bs.svg","iso":true,"name":"Bahamas"},{"capital":"Manama","code":"bh","continent":"Asia","flag_1x1":"flags/1x1/bh.svg","flag_4x3":"flags/4x3/bh.svg","iso":true,"name":"Bahrain"},{"capital":"Dhaka","code":"bd","continent":"Asia","flag_1x1":"flags/1x1/bd.svg","flag_4x3":"flags/4x3/bd.svg","iso":true,"name":"Bangladesh"},{"capital":"Bridgetown","code":"bb","continent":"North America","flag_1x1":"flags/1x1/bb.svg","flag_4x3":"flags/4x3/bb.svg","iso":true,"name":"Barbados"},{"code":"es-pv","flag_1x1":"flags/1x1/es-pv.svg","flag_4x3":"flags/4x3/es-pv.svg","iso":false,"name":"Basque Country"},{"capital":"Minsk","code":"by","continent":"Europe","flag_1x1":"flags/1x1/by.svg","flag_4x3":"flags/4x3/by.svg","iso":true,"name":"Belarus"},{"capital":"Brussels","code":"be","continent":"Europe","flag_1x1":"flags/1x1/be.svg","flag_4x3":"flags/4x3/be.svg","iso":true,"name":"Belgium"},{"capital":"Belmopan","code":"bz","continent":"North America","flag_1x1":"flags/1x1/bz.svg","flag_4x3":"flags/4x3/bz.svg","iso":true,"name":"Belize"},{"capital":"Porto-Novo","code":"bj","continent":"Africa","flag_1x1":"flags/1x1/bj.svg","flag_4x3":"flags/4x3/bj.svg","iso":true,"name":"Benin"},{"capital":"Hamilton","code":"bm","continent":"North America","flag_1x1":"flags/1x1/bm.svg","flag_4x3":"flags/4x3/bm.svg","iso":true,"name":"Bermuda"},{"capital":"Thimphu","code":"bt","continent":"Asia","flag_1x1":"flags/1x1/bt.svg","flag_4x3":"flags/4x3/bt.svg","iso":true,"name":"Bhutan"},{"capital":"Sucre","code":"bo","continent":"South America","flag_1x1":"flags/1x1/bo.svg","flag_4x3":"flags/4x3/bo.svg","iso":true,"name":"Bolivia"},{"capital":"Kralendijk","code":"bq","continent":"South America","flag_1x1":"flags/1x1/bq.svg","flag_4x3":"flags/4x3/bq.svg","iso":true,"name":"Bonaire, Sint Eustatius and Saba"},{"capital":"Sarajevo","code":"ba","continent":"Europe","flag_1x1":"flags/1x1/ba.svg","flag_4x3":"flags/4x3/ba.svg","iso":true,"name":"Bosnia and Herzegovina"},{"capital":"Gaborone","code":"bw","continent":"Africa","flag_1x1":"flags/1x1/bw.svg","flag_4x3":"flags/4x3/bw.svg","iso":true,"name":"Botswana"},{"code":"bv","flag_1x1":"flags/1x1/bv.svg","flag_4x3":"flags/4x3/bv.svg","iso":true,"name":"Bouvet Island"},{"capital":"Brasília","code":"br","continent":"South America","flag_1x1":"flags/1x1/br.svg","flag_4x3":"flags/4x3/br.svg","iso":true,"name":"Brazil"},{"capital":"Diego Garcia","code":"io","continent":"Asia","flag_1x1":"flags/1x1/io.svg","flag_4x3":"flags/4x3/io.svg","iso":true,"name":"British Indian Ocean Territory"},{"capital":"Bandar Seri Begawan","code":"bn","continent":"Asia","flag_1x1":"flags/1x1/bn.svg","flag_4x3":"flags/4x3/bn.svg","iso":true,"name":"Brunei Darussalam"},{"capital":"Sofia","code":"bg","continent":"Europe","flag_1x1":"flags/1x1/bg.svg","flag_4x3":"flags/4x3/bg.svg","iso":true,"name":"Bulgaria"},{"capital":"Ouagadougou","code":"bf","continent":"Africa","flag_1x1":"flags/1x1/bf.svg","flag_4x3":"flags/4x3/bf.svg","iso":true,"name":"Burkina Faso"},{"capital":"Bujumbura","code":"bi","continent":"Africa","flag_1x1":"flags/1x1/bi.svg","flag_4x3":"flags/4x3/bi.svg","iso":true,"name":"Burundi"},{"capital":"Praia","code":"cv","continent":"Africa","flag_1x1":"flags/1x1/cv.svg","flag_4x3":"flags/4x3/cv.svg","iso":true,"name":"Cabo Verde"},{"capital":"Phnom Penh","code":"kh","continent":"Asia","flag_1x1":"flags/1x1/kh.svg","flag_4x3":"flags/4x3/kh.svg","iso":true,"name":"Cambodia"},{"capital":"Yaoundé","code":"cm","continent":"Africa","flag_1x1":"flags/1x1/cm.svg","flag_4x3":"flags/4x3/cm.svg","iso":true,"name":"Cameroon"},{"capital":"Ottawa","code":"ca","continent":"North America","flag_1x1":"flags/1x1/ca.svg","flag_4x3":"flags/4x3/ca.svg","iso":true,"name":"Canada"},{"code":"ic","flag_1x1":"flags/1x1/ic.svg","flag_4x3":"flags/4x3/ic.svg","iso":false,"name":"Canary Islands"},{"code":"es-ct","flag_1x1":"flags/1x1/es-ct.svg","flag_4x3":"flags/4x3/es-ct.svg","iso":false,"name":"Catalonia"},{"capital":"George Town","code":"ky","continent":"North America","flag_1x1":"flags/1x1/ky.svg","flag_4x3":"flags/4x3/ky.svg","iso":true,"name":"Cayman Islands"},{"capital":"Bangui","code":"cf","continent":"Africa","flag_1x1":"flags/1x1/cf.svg","flag_4x3":"flags/4x3/cf.svg","iso":true,"name":"Central African Republic"},{"code":"cefta","flag_1x1":"flags/1x1/cefta.svg","flag_4x3":"flags/4x3/cefta.svg","iso":false,"name":"Central European Free Trade Agreement"},{"capital":"N'Djamena","code":"td","continent":"Africa","flag_1x1":"flags/1x1/td.svg","flag_4x3":"flags/4x3/td.svg","iso":true,"name":"Chad"},{"capital":"Santiago","code":"cl","continent":"South America","flag_1x1":"flags/1x1/cl.svg","flag_4x3":"flags/4x3/cl.svg","iso":true,"name":"Chile"},{"capital":"Beijing","code":"cn","continent":"Asia","flag_1x1":"flags/1x1/cn.svg","flag_4x3":"flags/4x3/cn.svg","iso":true,"name":"China"},{"capital":"Flying Fish Cove","code":"cx","continent":"Asia","flag_1x1":"flags/1x1/cx.svg","flag_4x3":"flags/4x3/cx.svg","iso":true,"name":"Christmas Island"},{"code":"cp","flag_1x1":"flags/1x1/cp.svg","flag_4x3":"flags/4x3/cp.svg","iso":false,"name":"Clipperton Island"},{"capital":"West Island","code":"cc","continent":"Asia","flag_1x1":"flags/1x1/cc.svg","flag_4x3":"flags/4x3/cc.svg","iso":true,"name":"Cocos (Keeling) Islands"},{"capital":"Bogotá","code":"co","continent":"South America","flag_1x1":"flags/1x1/co.svg","flag_4x3":"flags/4x3/co.svg","iso":true,"name":"Colombia"},{"capital":"Moroni","code":"km","continent":"Africa","flag_1x1":"flags/1x1/km.svg","flag_4x3":"flags/4x3/km.svg","iso":true,"name":"Comoros"},{"capital":"Avarua","code":"ck","continent":"Oceania","flag_1x1":"flags/1x1/ck.svg","flag_4x3":"flags/4x3/ck.svg","iso":true,"name":"Cook Islands"},{"capital":"San José","code":"cr","continent":"North America","flag_1x1":"flags/1x1/cr.svg","flag_4x3":"flags/4x3/cr.svg","iso":true,"name":"Costa Rica"},{"capital":"Zagreb","code":"hr","continent":"Europe","flag_1x1":"flags/1x1/hr.svg","flag_4x3":"flags/4x3/hr.svg","iso":true,"name":"Croatia"},{"capital":"Havana","code":"cu","continent":"North America","flag_1x1":"flags/1x1/cu.svg","flag_4x3":"flags/4x3/cu.svg","iso":true,"name":"Cuba"},{"capital":"Willemstad","code":"cw","continent":"South America","flag_1x1":"flags/1x1/cw.svg","flag_4x3":"flags/4x3/cw.svg","iso":true,"name":"Curaçao"},{"capital":"Nicosia","code":"cy","continent":"Europe","flag_1x1":"flags/1x1/cy.svg","flag_4x3":"flags/4x3/cy.svg","iso":true,"name":"Cyprus"},{"capital":"Prague","code":"cz","continent":"Europe","flag_1x1":"flags/1x1/cz.svg","flag_4x3":"flags/4x3/cz.svg","iso":true,"name":"Czech Republic"},{"capital":"Yamoussoukro","code":"ci","continent":"Africa","flag_1x1":"flags/1x1/ci.svg","flag_4x3":"flags/4x3/ci.svg","iso":true,"name":"Côte d'Ivoire"},{"capital":"Kinshasa","code":"cd","continent":"Africa","flag_1x1":"flags/1x1/cd.svg","flag_4x3":"flags/4x3/cd.svg","iso":true,"name":"Democratic Republic of the Congo"},{"capital":"Copenhagen","code":"dk","continent":"Europe","flag_1x1":"flags/1x1/dk.svg","flag_4x3":"flags/4x3/dk.svg","iso":true,"name":"Denmark"},{"code":"dg","flag_1x1":"flags/1x1/dg.svg","flag_4x3":"flags/4x3/dg.svg","iso":false,"name":"Diego Garcia"},{"capital":"Djibouti","code":"dj","continent":"Africa","flag_1x1":"flags/1x1/dj.svg","flag_4x3":"flags/4x3/dj.svg","iso":true,"name":"Djibouti"},{"capital":"Roseau","code":"dm","continent":"North America","flag_1x1":"flags/1x1/dm.svg","flag_4x3":"flags/4x3/dm.svg","iso":true,"name":"Dominica"},{"capital":"Santo Domingo","code":"do","continent":"North America","flag_1x1":"flags/1x1/do.svg","flag_4x3":"flags/4x3/do.svg","iso":true,"name":"Dominican Republic"},{"code":"eac","flag_1x1":"flags/1x1/eac.svg","flag_4x3":"flags/4x3/eac.svg","iso":false,"name":"East African Community"},{"capital":"Quito","code":"ec","continent":"South America","flag_1x1":"flags/1x1/ec.svg","flag_4x3":"flags/4x3/ec.svg","iso":true,"name":"Ecuador"},{"capital":"Cairo","code":"eg","continent":"Africa","flag_1x1":"flags/1x1/eg.svg","flag_4x3":"flags/4x3/eg.svg","iso":true,"name":"Egypt"},{"capital":"San Salvador","code":"sv","continent":"North America","flag_1x1":"flags/1x1/sv.svg","flag_4x3":"flags/4x3/sv.svg","iso":true,"name":"El Salvador"},{"capital":"London","code":"gb-eng","continent":"Europe","flag_1x1":"flags/1x1/gb-eng.svg","flag_4x3":"flags/4x3/gb-eng.svg","iso":false,"name":"England"},{"capital":"Malabo","code":"gq","continent":"Africa","flag_1x1":"flags/1x1/gq.svg","flag_4x3":"flags/4x3/gq.svg","iso":true,"name":"Equatorial Guinea"},{"capital":"Asmara","code":"er","continent":"Africa","flag_1x1":"flags/1x1/er.svg","flag_4x3":"flags/4x3/er.svg","iso":true,"name":"Eritrea"},{"capital":"Tallinn","code":"ee","continent":"Europe","flag_1x1":"flags/1x1/ee.svg","flag_4x3":"flags/4x3/ee.svg","iso":true,"name":"Estonia"},{"capital":"Lobamba, Mbabane","code":"sz","continent":"Africa","flag_1x1":"flags/1x1/sz.svg","flag_4x3":"flags/4x3/sz.svg","iso":true,"name":"Eswatini"},{"capital":"Addis Ababa","code":"et","continent":"Africa","flag_1x1":"flags/1x1/et.svg","flag_4x3":"flags/4x3/et.svg","iso":true,"name":"Ethiopia"},{"code":"eu","flag_1x1":"flags/1x1/eu.svg","flag_4x3":"flags/4x3/eu.svg","iso":false,"name":"Europe"},{"capital":"Stanley","code":"fk","continent":"South America","flag_1x1":"flags/1x1/fk.svg","flag_4x3":"flags/4x3/fk.svg","iso":true,"name":"Falkland Islands"},{"capital":"Tórshavn","code":"fo","continent":"Europe","flag_1x1":"flags/1x1/fo.svg","flag_4x3":"flags/4x3/fo.svg","iso":true,"name":"Faroe Islands"},{"capital":"Palikir","code":"fm","continent":"Oceania","flag_1x1":"flags/1x1/fm.svg","flag_4x3":"flags/4x3/fm.svg","iso":true,"name":"Federated States of Micronesia"},{"capital":"Suva","code":"fj","continent":"Oceania","flag_1x1":"flags/1x1/fj.svg","flag_4x3":"flags/4x3/fj.svg","iso":true,"name":"Fiji"},{"capital":"Helsinki","code":"fi","continent":"Europe","flag_1x1":"flags/1x1/fi.svg","flag_4x3":"flags/4x3/fi.svg","iso":true,"name":"Finland"},{"capital":"Paris","code":"fr","continent":"Europe","flag_1x1":"flags/1x1/fr.svg","flag_4x3":"flags/4x3/fr.svg","iso":true,"name":"France"},{"capital":"Cayenne","code":"gf","continent":"South America","flag_1x1":"flags/1x1/gf.svg","flag_4x3":"flags/4x3/gf.svg","iso":true,"name":"French Guiana"},{"capital":"Papeete","code":"pf","continent":"Oceania","flag_1x1":"flags/1x1/pf.svg","flag_4x3":"flags/4x3/pf.svg","iso":true,"name":"French Polynesia"},{"capital":"Saint-Pierre, Réunion","code":"tf","continent":"Africa","flag_1x1":"flags/1x1/tf.svg","flag_4x3":"flags/4x3/tf.svg","iso":true,"name":"French Southern Territories"},{"capital":"Libreville","code":"ga","continent":"Africa","flag_1x1":"flags/1x1/ga.svg","flag_4x3":"flags/4x3/ga.svg","iso":true,"name":"Gabon"},{"code":"es-ga","flag_1x1":"flags/1x1/es-ga.svg","flag_4x3":"flags/4x3/es-ga.svg","iso":false,"name":"Galicia"},{"capital":"Banjul","code":"gm","continent":"Africa","flag_1x1":"flags/1x1/gm.svg","flag_4x3":"flags/4x3/gm.svg","iso":true,"name":"Gambia"},{"capital":"Tbilisi","code":"ge","continent":"Asia","flag_1x1":"flags/1x1/ge.svg","flag_4x3":"flags/4x3/ge.svg","iso":true,"name":"Georgia"},{"capital":"Berlin","code":"de","continent":"Europe","flag_1x1":"flags/1x1/de.svg","flag_4x3":"flags/4x3/de.svg","iso":true,"name":"Germany"},{"capital":"Accra","code":"gh","continent":"Africa","flag_1x1":"flags/1x1/gh.svg","flag_4x3":"flags/4x3/gh.svg","iso":true,"name":"Ghana"},{"capital":"Gibraltar","code":"gi","continent":"Europe","flag_1x1":"flags/1x1/gi.svg","flag_4x3":"flags/4x3/gi.svg","iso":true,"name":"Gibraltar"},{"capital":"Athens","code":"gr","continent":"Europe","flag_1x1":"flags/1x1/gr.svg","flag_4x3":"flags/4x3/gr.svg","iso":true,"name":"Greece"},{"capital":"Nuuk","code":"gl","continent":"North America","flag_1x1":"flags/1x1/gl.svg","flag_4x3":"flags/4x3/gl.svg","iso":true,"name":"Greenland"},{"capital":"St. George's","code":"gd","continent":"North America","flag_1x1":"flags/1x1/gd.svg","flag_4x3":"flags/4x3/gd.svg","iso":true,"name":"Grenada"},{"capital":"Basse-Terre","code":"gp","continent":"North America","flag_1x1":"flags/1x1/gp.svg","flag_4x3":"flags/4x3/gp.svg","iso":true,"name":"Guadeloupe"},{"capital":"Hagåtña","code":"gu","continent":"Oceania","flag_1x1":"flags/1x1/gu.svg","flag_4x3":"flags/4x3/gu.svg","iso":true,"name":"Guam"},{"capital":"Guatemala City","code":"gt","continent":"North America","flag_1x1":"flags/1x1/gt.svg","flag_4x3":"flags/4x3/gt.svg","iso":true,"name":"Guatemala"},{"capital":"Saint Peter Port","code":"gg","continent":"Europe","flag_1x1":"flags/1x1/gg.svg","flag_4x3":"flags/4x3/gg.svg","iso":true,"name":"Guernsey"},{"capital":"Conakry","code":"gn","continent":"Africa","flag_1x1":"flags/1x1/gn.svg","flag_4x3":"flags/4x3/gn.svg","iso":true,"name":"Guinea"},{"capital":"Bissau","code":"gw","continent":"Africa","flag_1x1":"flags/1x1/gw.svg","flag_4x3":"flags/4x3/gw.svg","iso":true,"name":"Guinea-Bissau"},{"capital":"Georgetown","code":"gy","continent":"South America","flag_1x1":"flags/1x1/gy.svg","flag_4x3":"flags/4x3/gy.svg","iso":true,"name":"Guyana"},{"capital":"Port-au-Prince","code":"ht","continent":"North America","flag_1x1":"flags/1x1/ht.svg","flag_4x3":"flags/4x3/ht.svg","iso":true,"name":"Haiti"},{"code":"hm","flag_1x1":"flags/1x1/hm.svg","flag_4x3":"flags/4x3/hm.svg","iso":true,"name":"Heard Island and McDonald Islands"},{"capital":"Vatican City","code":"va","continent":"Europe","flag_1x1":"flags/1x1/va.svg","flag_4x3":"flags/4x3/va.svg","iso":true,"name":"Holy See"},{"capital":"Tegucigalpa","code":"hn","continent":"North America","flag_1x1":"flags/1x1/hn.svg","flag_4x3":"flags/4x3/hn.svg","iso":true,"name":"Honduras"},{"capital":"Hong Kong","code":"hk","continent":"Asia","flag_1x1":"flags/1x1/hk.svg","flag_4x3":"flags/4x3/hk.svg","iso":true,"name":"Hong Kong"},{"capital":"Budapest","code":"hu","continent":"Europe","flag_1x1":"flags/1x1/hu.svg","flag_4x3":"flags/4x3/hu.svg","iso":true,"name":"Hungary"},{"capital":"Reykjavik","code":"is","continent":"Europe","flag_1x1":"flags/1x1/is.svg","flag_4x3":"flags/4x3/is.svg","iso":true,"name":"Iceland"},{"capital":"New Delhi","code":"in","continent":"Asia","flag_1x1":"flags/1x1/in.svg","flag_4x3":"flags/4x3/in.svg","iso":true,"name":"India"},{"capital":"Jakarta","code":"id","continent":"Asia","flag_1x1":"flags/1x1/id.svg","flag_4x3":"flags/4x3/id.svg","iso":true,"name":"Indonesia"},{"capital":"Tehran","code":"ir","continent":"Asia","flag_1x1":"flags/1x1/ir.svg","flag_4x3":"flags/4x3/ir.svg","iso":true,"name":"Iran"},{"capital":"Baghdad","code":"iq","continent":"Asia","flag_1x1":"flags/1x1/iq.svg","flag_4x3":"flags/4x3/iq.svg","iso":true,"name":"Iraq"},{"capital":"Dublin","code":"ie","continent":"Europe","flag_1x1":"flags/1x1/ie.svg","flag_4x3":"flags/4x3/ie.svg","iso":true,"name":"Ireland"},{"capital":"Douglas","code":"im","continent":"Europe","flag_1x1":"flags/1x1/im.svg","flag_4x3":"flags/4x3/im.svg","iso":true,"name":"Isle of Man"},{"capital":"Jerusalem","code":"il","continent":"Asia","flag_1x1":"flags/1x1/il.svg","flag_4x3":"flags/4x3/il.svg","iso":true,"name":"Israel"},{"capital":"Rome","code":"it","continent":"Europe","flag_1x1":"flags/1x1/it.svg","flag_4x3":"flags/4x3/it.svg","iso":true,"name":"Italy"},{"capital":"Kingston","code":"jm","continent":"North America","flag_1x1":"flags/1x1/jm.svg","flag_4x3":"flags/4x3/jm.svg","iso":true,"name":"Jamaica"},{"capital":"Tokyo","code":"jp","continent":"Asia","flag_1x1":"flags/1x1/jp.svg","flag_4x3":"flags/4x3/jp.svg","iso":true,"name":"Japan"},{"capital":"Saint Helier","code":"je","continent":"Europe","flag_1x1":"flags/1x1/je.svg","flag_4x3":"flags/4x3/je.svg","iso":true,"name":"Jersey"},{"capital":"Amman","code":"jo","continent":"Asia","flag_1x1":"flags/1x1/jo.svg","flag_4x3":"flags/4x3/jo.svg","iso":true,"name":"Jordan"},{"capital":"Astana","code":"kz","continent":"Asia","flag_1x1":"flags/1x1/kz.svg","flag_4x3":"flags/4x3/kz.svg","iso":true,"name":"Kazakhstan"},{"capital":"Nairobi","code":"ke","continent":"Africa","flag_1x1":"flags/1x1/ke.svg","flag_4x3":"flags/4x3/ke.svg","iso":true,"name":"Kenya"},{"capital":"South Tarawa","code":"ki","continent":"Oceania","flag_1x1":"flags/1x1/ki.svg","flag_4x3":"flags/4x3/ki.svg","iso":true,"name":"Kiribati"},{"capital":"Pristina","code":"xk","continent":"Europe","flag_1x1":"flags/1x1/xk.svg","flag_4x3":"flags/4x3/xk.svg","iso":false,"name":"Kosovo"},{"capital":"Kuwait City","code":"kw","continent":"Asia","flag_1x1":"flags/1x1/kw.svg","flag_4x3":"flags/4x3/kw.svg","iso":true,"name":"Kuwait"},{"capital":"Bishkek","code":"kg","continent":"Asia","flag_1x1":"flags/1x1/kg.svg","flag_4x3":"flags/4x3/kg.svg","iso":true,"name":"Kyrgyzstan"},{"capital":"Vientiane","code":"la","continent":"Asia","flag_1x1":"flags/1x1/la.svg","flag_4x3":"flags/4x3/la.svg","iso":true,"name":"Laos"},{"capital":"Riga","code":"lv","continent":"Europe","flag_1x1":"flags/1x1/lv.svg","flag_4x3":"flags/4x3/lv.svg","iso":true,"name":"Latvia"},{"code":"arab","flag_1x1":"flags/1x1/arab.svg","flag_4x3":"flags/4x3/arab.svg","iso":false,"name":"League of Arab States"},{"capital":"Beirut","code":"lb","continent":"Asia","flag_1x1":"flags/1x1/lb.svg","flag_4x3":"flags/4x3/lb.svg","iso":true,"name":"Lebanon"},{"capital":"Maseru","code":"ls","continent":"Africa","flag_1x1":"flags/1x1/ls.svg","flag_4x3":"flags/4x3/ls.svg","iso":true,"name":"Lesotho"},{"capital":"Monrovia","code":"lr","continent":"Africa","flag_1x1":"flags/1x1/lr.svg","flag_4x3":"flags/4x3/lr.svg","iso":true,"name":"Liberia"},{"capital":"Tripoli","code":"ly","continent":"Africa","flag_1x1":"flags/1x1/ly.svg","flag_4x3":"flags/4x3/ly.svg","iso":true,"name":"Libya"},{"capital":"Vaduz","code":"li","continent":"Europe","flag_1x1":"flags/1x1/li.svg","flag_4x3":"flags/4x3/li.svg","iso":true,"name":"Liechtenstein"},{"capital":"Vilnius","code":"lt","continent":"Europe","flag_1x1":"flags/1x1/lt.svg","flag_4x3":"flags/4x3/lt.svg","iso":true,"name":"Lithuania"},{"capital":"Luxembourg City","code":"lu","continent":"Europe","flag_1x1":"flags/1x1/lu.svg","flag_4x3":"flags/4x3/lu.svg","iso":true,"name":"Luxembourg"},{"capital":"Macau","code":"mo","continent":"Asia","flag_1x1":"flags/1x1/mo.svg","flag_4x3":"flags/4x3/mo.svg","iso":true,"name":"Macau"},{"capital":"Antananarivo","code":"mg","continent":"Africa","flag_1x1":"flags/1x1/mg.svg","flag_4x3":"flags/4x3/mg.svg","iso":true,"name":"Madagascar"},{"capital":"Lilongwe","code":"mw","continent":"Africa","flag_1x1":"flags/1x1/mw.svg","flag_4x3":"flags/4x3/mw.svg","iso":true,"name":"Malawi"},{"capital":"Kuala Lumpur","code":"my","continent":"Asia","flag_1x1":"flags/1x1/my.svg","flag_4x3":"flags/4x3/my.svg","iso":true,"name":"Malaysia"},{"capital":"Malé","code":"mv","continent":"Asia","flag_1x1":"flags/1x1/mv.svg","flag_4x3":"flags/4x3/mv.svg","iso":true,"name":"Maldives"},{"capital":"Bamako","code":"ml","continent":"Africa","flag_1x1":"flags/1x1/ml.svg","flag_4x3":"flags/4x3/ml.svg","iso":true,"name":"Mali"},{"capital":"Valletta","code":"mt","continent":"Europe","flag_1x1":"flags/1x1/mt.svg","flag_4x3":"flags/4x3/mt.svg","iso":true,"name":"Malta"},{"capital":"Majuro","code":"mh","continent":"Oceania","flag_1x1":"flags/1x1/mh.svg","flag_4x3":"flags/4x3/mh.svg","iso":true,"name":"Marshall Islands"},{"capital":"Fort-de-France","code":"mq","continent":"North America","flag_1x1":"flags/1x1/mq.svg","flag_4x3":"flags/4x3/mq.svg","iso":true,"name":"Martinique"},{"capital":"Nouakchott","code":"mr","continent":"Africa","flag_1x1":"flags/1x1/mr.svg","flag_4x3":"flags/4x3/mr.svg","iso":true,"name":"Mauritania"},{"capital":"Port Louis","code":"mu","continent":"Africa","flag_1x1":"flags/1x1/mu.svg","flag_4x3":"flags/4x3/mu.svg","iso":true,"name":"Mauritius"},{"capital":"Mamoudzou","code":"yt","continent":"Africa","flag_1x1":"flags/1x1/yt.svg","flag_4x3":"flags/4x3/yt.svg","iso":true,"name":"Mayotte"},{"capital":"Mexico City","code":"mx","continent":"North America","flag_1x1":"flags/1x1/mx.svg","flag_4x3":"flags/4x3/mx.svg","iso":true,"name":"Mexico"},{"capital":"Chișinău","code":"md","continent":"Europe","flag_1x1":"flags/1x1/md.svg","flag_4x3":"flags/4x3/md.svg","iso":true,"name":"Moldova"},{"capital":"Monaco","code":"mc","continent":"Europe","flag_1x1":"flags/1x1/mc.svg","flag_4x3":"flags/4x3/mc.svg","iso":true,"name":"Monaco"},{"capital":"Ulaanbaatar","code":"mn","continent":"Asia","flag_1x1":"flags/1x1/mn.svg","flag_4x3":"flags/4x3/mn.svg","iso":true,"name":"Mongolia"},{"capital":"Podgorica","code":"me","continent":"Europe","flag_1x1":"flags/1x1/me.svg","flag_4x3":"flags/4x3/me.svg","iso":true,"name":"Montenegro"},{"capital":"Little Bay, Brades, Plymouth","code":"ms","continent":"North America","flag_1x1":"flags/1x1/ms.svg","flag_4x3":"flags/4x3/ms.svg","iso":true,"name":"Montserrat"},{"capital":"Rabat","code":"ma","continent":"Africa","flag_1x1":"flags/1x1/ma.svg","flag_4x3":"flags/4x3/ma.svg","iso":true,"name":"Morocco"},{"capital":"Maputo","code":"mz","continent":"Africa","flag_1x1":"flags/1x1/mz.svg","flag_4x3":"flags/4x3/mz.svg","iso":true,"name":"Mozambique"},{"capital":"Naypyidaw","code":"mm","continent":"Asia","flag_1x1":"flags/1x1/mm.svg","flag_4x3":"flags/4x3/mm.svg","iso":true,"name":"Myanmar"},{"capital":"Windhoek","code":"na","continent":"Africa","flag_1x1":"flags/1x1/na.svg","flag_4x3":"flags/4x3/na.svg","iso":true,"name":"Namibia"},{"capital":"Yaren District","code":"nr","continent":"Oceania","flag_1x1":"flags/1x1/nr.svg","flag_4x3":"flags/4x3/nr.svg","iso":true,"name":"Nauru"},{"capital":"Kathmandu","code":"np","continent":"Asia","flag_1x1":"flags/1x1/np.svg","flag_4x3":"flags/4x3/np.svg","iso":true,"name":"Nepal"},{"capital":"Amsterdam","code":"nl","continent":"Europe","flag_1x1":"flags/1x1/nl.svg","flag_4x3":"flags/4x3/nl.svg","iso":true,"name":"Netherlands"},{"capital":"Nouméa","code":"nc","continent":"Oceania","flag_1x1":"flags/1x1/nc.svg","flag_4x3":"flags/4x3/nc.svg","iso":true,"name":"New Caledonia"},{"capital":"Wellington","code":"nz","continent":"Oceania","flag_1x1":"flags/1x1/nz.svg","flag_4x3":"flags/4x3/nz.svg","iso":true,"name":"New Zealand"},{"capital":"Managua","code":"ni","continent":"North America","flag_1x1":"flags/1x1/ni.svg","flag_4x3":"flags/4x3/ni.svg","iso":true,"name":"Nicaragua"},{"capital":"Niamey","code":"ne","continent":"Africa","flag_1x1":"flags/1x1/ne.svg","flag_4x3":"flags/4x3/ne.svg","iso":true,"name":"Niger"},{"capital":"Abuja","code":"ng","continent":"Africa","flag_1x1":"flags/1x1/ng.svg","flag_4x3":"flags/4x3/ng.svg","iso":true,"name":"Nigeria"},{"capital":"Alofi","code":"nu","continent":"Oceania","flag_1x1":"flags/1x1/nu.svg","flag_4x3":"flags/4x3/nu.svg","iso":true,"name":"Niue"},{"capital":"Kingston","code":"nf","continent":"Oceania","flag_1x1":"flags/1x1/nf.svg","flag_4x3":"flags/4x3/nf.svg","iso":true,"name":"Norfolk Island"},{"capital":"Pyongyang","code":"kp","continent":"Asia","flag_1x1":"flags/1x1/kp.svg","flag_4x3":"flags/4x3/kp.svg","iso":true,"name":"North Korea"},{"capital":"Skopje","code":"mk","continent":"Europe","flag_1x1":"flags/1x1/mk.svg","flag_4x3":"flags/4x3/mk.svg","iso":true,"name":"North Macedonia"},{"capital":"Belfast","code":"gb-nir","continent":"Europe","flag_1x1":"flags/1x1/gb-nir.svg","flag_4x3":"flags/4x3/gb-nir.svg","iso":false,"name":"Northern Ireland"},{"capital":"Saipan","code":"mp","continent":"Oceania","flag_1x1":"flags/1x1/mp.svg","flag_4x3":"flags/4x3/mp.svg","iso":true,"name":"Northern Mariana Islands"},{"capital":"Oslo","code":"no","continent":"Europe","flag_1x1":"flags/1x1/no.svg","flag_4x3":"flags/4x3/no.svg","iso":true,"name":"Norway"},{"capital":"Muscat","code":"om","continent":"Asia","flag_1x1":"flags/1x1/om.svg","flag_4x3":"flags/4x3/om.svg","iso":true,"name":"Oman"},{"code":"pc","flag_1x1":"flags/1x1/pc.svg","flag_4x3":"flags/4x3/pc.svg","iso":false,"name":"Pacific Community"},{"capital":"Islamabad","code":"pk","continent":"Asia","flag_1x1":"flags/1x1/pk.svg","flag_4x3":"flags/4x3/pk.svg","iso":true,"name":"Pakistan"},{"capital":"Ngerulmud","code":"pw","continent":"Oceania","flag_1x1":"flags/1x1/pw.svg","flag_4x3":"flags/4x3/pw.svg","iso":true,"name":"Palau"},{"capital":"Panama City","code":"pa","continent":"North America","flag_1x1":"flags/1x1/pa.svg","flag_4x3":"flags/4x3/pa.svg","iso":true,"name":"Panama"},{"capital":"Port Moresby","code":"pg","continent":"Oceania","flag_1x1":"flags/1x1/pg.svg","flag_4x3":"flags/4x3/pg.svg","iso":true,"name":"Papua New Guinea"},{"capital":"Asunción","code":"py","continent":"South America","flag_1x1":"flags/1x1/py.svg","flag_4x3":"flags/4x3/py.svg","iso":true,"name":"Paraguay"},{"capital":"Lima","code":"pe","continent":"South America","flag_1x1":"flags/1x1/pe.svg","flag_4x3":"flags/4x3/pe.svg","iso":true,"name":"Peru"},{"capital":"Manila","code":"ph","continent":"Asia","flag_1x1":"flags/1x1/ph.svg","flag_4x3":"flags/4x3/ph.svg","iso":true,"name":"Philippines"},{"capital":"Adamstown","code":"pn","continent":"Oceania","flag_1x1":"flags/1x1/pn.svg","flag_4x3":"flags/4x3/pn.svg","iso":true,"name":"Pitcairn"},{"capital":"Warsaw","code":"pl","continent":"Europe","flag_1x1":"flags/1x1/pl.svg","flag_4x3":"flags/4x3/pl.svg","iso":true,"name":"Poland"},{"capital":"Lisbon","code":"pt","continent":"Europe","flag_1x1":"flags/1x1/pt.svg","flag_4x3":"flags/4x3/pt.svg","iso":true,"name":"Portugal"},{"capital":"San Juan","code":"pr","continent":"North America","flag_1x1":"flags/1x1/pr.svg","flag_4x3":"flags/4x3/pr.svg","iso":true,"name":"Puerto Rico"},{"capital":"Doha","code":"qa","continent":"Asia","flag_1x1":"flags/1x1/qa.svg","flag_4x3":"flags/4x3/qa.svg","iso":true,"name":"Qatar"},{"capital":"Brazzaville","code":"cg","continent":"Africa","flag_1x1":"flags/1x1/cg.svg","flag_4x3":"flags/4x3/cg.svg","iso":true,"name":"Republic of the Congo"},{"capital":"Bucharest","code":"ro","continent":"Europe","flag_1x1":"flags/1x1/ro.svg","flag_4x3":"flags/4x3/ro.svg","iso":true,"name":"Romania"},{"capital":"Moscow","code":"ru","continent":"Europe","flag_1x1":"flags/1x1/ru.svg","flag_4x3":"flags/4x3/ru.svg","iso":true,"name":"Russia"},{"capital":"Kigali","code":"rw","continent":"Africa","flag_1x1":"flags/1x1/rw.svg","flag_4x3":"flags/4x3/rw.svg","iso":true,"name":"Rwanda"},{"capital":"Saint-Denis","code":"re","continent":"Africa","flag_1x1":"flags/1x1/re.svg","flag_4x3":"flags/4x3/re.svg","iso":true,"name":"Réunion"},{"capital":"Gustavia","code":"bl","continent":"North America","flag_1x1":"flags/1x1/bl.svg","flag_4x3":"flags/4x3/bl.svg","iso":true,"name":"Saint Barthélemy"},{"capital":"Jamestown","code":"sh-hl","continent":"Africa","flag_1x1":"flags/1x1/sh-hl.svg","flag_4x3":"flags/4x3/sh-hl.svg","iso":false,"name":"Saint Helena"},{"capital":"Jamestown","code":"sh","continent":"Africa","flag_1x1":"flags/1x1/sh.svg","flag_4x3":"flags/4x3/sh.svg","iso":true,"name":"Saint Helena, Ascension and Tristan da Cunha"},{"capital":"Basseterre","code":"kn","continent":"North America","flag_1x1":"flags/1x1/kn.svg","flag_4x3":"flags/4x3/kn.svg","iso":true,"name":"Saint Kitts and Nevis"},{"capital":"Castries","code":"lc","continent":"North America","flag_1x1":"flags/1x1/lc.svg","flag_4x3":"flags/4x3/lc.svg","iso":true,"name":"Saint Lucia"},{"capital":"Marigot","code":"mf","continent":"North America","flag_1x1":"flags/1x1/mf.svg","flag_4x3":"flags/4x3/mf.svg","iso":true,"name":"Saint Martin"},{"capital":"Saint-Pierre","code":"pm","continent":"North America","flag_1x1":"flags/1x1/pm.svg","flag_4x3":"flags/4x3/pm.svg","iso":true,"name":"Saint Pierre and Miquelon"},{"capital":"Kingstown","code":"vc","continent":"North America","flag_1x1":"flags/1x1/vc.svg","flag_4x3":"flags/4x3/vc.svg","iso":true,"name":"Saint Vincent and the Grenadines"},{"capital":"Apia","code":"ws","continent":"Oceania","flag_1x1":"flags/1x1/ws.svg","flag_4x3":"flags/4x3/ws.svg","iso":true,"name":"Samoa"},{"capital":"San Marino","code":"sm","continent":"Europe","flag_1x1":"flags/1x1/sm.svg","flag_4x3":"flags/4x3/sm.svg","iso":true,"name":"San Marino"},{"capital":"São Tomé","code":"st","continent":"Africa","flag_1x1":"flags/1x1/st.svg","flag_4x3":"flags/4x3/st.svg","iso":true,"name":"Sao Tome and Principe"},{"capital":"Riyadh","code":"sa","continent":"Asia","flag_1x1":"flags/1x1/sa.svg","flag_4x3":"flags/4x3/sa.svg","iso":true,"name":"Saudi Arabia"},{"capital":"Edinburgh","code":"gb-sct","continent":"Europe","flag_1x1":"flags/1x1/gb-sct.svg","flag_4x3":"flags/4x3/gb-sct.svg","iso":false,"name":"Scotland"},{"capital":"Dakar","code":"sn","continent":"Africa","flag_1x1":"flags/1x1/sn.svg","flag_4x3":"flags/4x3/sn.svg","iso":true,"name":"Senegal"},{"capital":"Belgrade","code":"rs","continent":"Europe","flag_1x1":"flags/1x1/rs.svg","flag_4x3":"flags/4x3/rs.svg","iso":true,"name":"Serbia"},{"capital":"Victoria","code":"sc","continent":"Africa","flag_1x1":"flags/1x1/sc.svg","flag_4x3":"flags/4x3/sc.svg","iso":true,"name":"Seychelles"},{"capital":"Freetown","code":"sl","continent":"Africa","flag_1x1":"flags/1x1/sl.svg","flag_4x3":"flags/4x3/sl.svg","iso":true,"name":"Sierra Leone"},{"capital":"Singapore","code":"sg","continent":"Asia","flag_1x1":"flags/1x1/sg.svg","flag_4x3":"flags/4x3/sg.svg","iso":true,"name":"Singapore"},{"capital":"Philipsburg","code":"sx","continent":"North America","flag_1x1":"flags/1x1/sx.svg","flag_4x3":"flags/4x3/sx.svg","iso":true,"name":"Sint Maarten"},{"capital":"Bratislava","code":"sk","continent":"Europe","flag_1x1":"flags/1x1/sk.svg","flag_4x3":"flags/4x3/sk.svg","iso":true,"name":"Slovakia"},{"capital":"Ljubljana","code":"si","continent":"Europe","flag_1x1":"flags/1x1/si.svg","flag_4x3":"flags/4x3/si.svg","iso":true,"name":"Slovenia"},{"capital":"Honiara","code":"sb","continent":"Oceania","flag_1x1":"flags/1x1/sb.svg","flag_4x3":"flags/4x3/sb.svg","iso":true,"name":"Solomon Islands"},{"capital":"Mogadishu","code":"so","continent":"Africa","flag_1x1":"flags/1x1/so.svg","flag_4x3":"flags/4x3/so.svg","iso":true,"name":"Somalia"},{"capital":"Pretoria","code":"za","continent":"Africa","flag_1x1":"flags/1x1/za.svg","flag_4x3":"flags/4x3/za.svg","iso":true,"name":"South Africa"},{"capital":"King Edward Point","code":"gs","continent":"Antarctica","flag_1x1":"flags/1x1/gs.svg","flag_4x3":"flags/4x3/gs.svg","iso":true,"name":"South Georgia and the South Sandwich Islands"},{"capital":"Seoul","code":"kr","continent":"Asia","flag_1x1":"flags/1x1/kr.svg","flag_4x3":"flags/4x3/kr.svg","iso":true,"name":"South Korea"},{"capital":"Juba","code":"ss","continent":"Africa","flag_1x1":"flags/1x1/ss.svg","flag_4x3":"flags/4x3/ss.svg","iso":true,"name":"South Sudan"},{"capital":"Madrid","code":"es","continent":"Europe","flag_1x1":"flags/1x1/es.svg","flag_4x3":"flags/4x3/es.svg","iso":true,"name":"Spain"},{"capital":"Sri Jayawardenepura Kotte, Colombo","code":"lk","continent":"Asia","flag_1x1":"flags/1x1/lk.svg","flag_4x3":"flags/4x3/lk.svg","iso":true,"name":"Sri Lanka"},{"capital":"Ramallah","code":"ps","continent":"Asia","flag_1x1":"flags/1x1/ps.svg","flag_4x3":"flags/4x3/ps.svg","iso":true,"name":"State of Palestine"},{"capital":"Khartoum","code":"sd","continent":"Africa","flag_1x1":"flags/1x1/sd.svg","flag_4x3":"flags/4x3/sd.svg","iso":true,"name":"Sudan"},{"capital":"Paramaribo","code":"sr","continent":"South America","flag_1x1":"flags/1x1/sr.svg","flag_4x3":"flags/4x3/sr.svg","iso":true,"name":"Suriname"},{"capital":"Longyearbyen","code":"sj","continent":"Europe","flag_1x1":"flags/1x1/sj.svg","flag_4x3":"flags/4x3/sj.svg","iso":true,"name":"Svalbard and Jan Mayen"},{"capital":"Stockholm","code":"se","continent":"Europe","flag_1x1":"flags/1x1/se.svg","flag_4x3":"flags/4x3/se.svg","iso":true,"name":"Sweden"},{"capital":"Bern","code":"ch","continent":"Europe","flag_1x1":"flags/1x1/ch.svg","flag_4x3":"flags/4x3/ch.svg","iso":true,"name":"Switzerland"},{"capital":"Damascus","code":"sy","continent":"Asia","flag_1x1":"flags/1x1/sy.svg","flag_4x3":"flags/4x3/sy.svg","iso":true,"name":"Syria"},{"capital":"Taipei","code":"tw","continent":"Asia","flag_1x1":"flags/1x1/tw.svg","flag_4x3":"flags/4x3/tw.svg","iso":true,"name":"Taiwan"},{"capital":"Dushanbe","code":"tj","continent":"Asia","flag_1x1":"flags/1x1/tj.svg","flag_4x3":"flags/4x3/tj.svg","iso":true,"name":"Tajikistan"},{"capital":"Dodoma","code":"tz","continent":"Africa","flag_1x1":"flags/1x1/tz.svg","flag_4x3":"flags/4x3/tz.svg","iso":true,"name":"Tanzania"},{"capital":"Bangkok","code":"th","continent":"Asia","flag_1x1":"flags/1x1/th.svg","flag_4x3":"flags/4x3/th.svg","iso":true,"name":"Thailand"},{"capital":"Dili","code":"tl","continent":"Asia","flag_1x1":"flags/1x1/tl.svg","flag_4x3":"flags/4x3/tl.svg","iso":true,"name":"Timor-Leste"},{"capital":"Lomé","code":"tg","continent":"Africa","flag_1x1":"flags/1x1/tg.svg","flag_4x3":"flags/4x3/tg.svg","iso":true,"name":"Togo"},{"capital":"Nukunonu, Atafu,Tokelau","code":"tk","continent":"Oceania","flag_1x1":"flags/1x1/tk.svg","flag_4x3":"flags/4x3/tk.svg","iso":true,"name":"Tokelau"},{"capital":"Nukuʻalofa","code":"to","continent":"Oceania","flag_1x1":"flags/1x1/to.svg","flag_4x3":"flags/4x3/to.svg","iso":true,"name":"Tonga"},{"capital":"Port of Spain","code":"tt","continent":"South America","flag_1x1":"flags/1x1/tt.svg","flag_4x3":"flags/4x3/tt.svg","iso":true,"name":"Trinidad and Tobago"},{"capital":"Edinburgh of the Seven Seas","code":"sh-ta","continent":"Africa","flag_1x1":"flags/1x1/sh-ta.svg","flag_4x3":"flags/4x3/sh-ta.svg","iso":false,"name":"Tristan da Cunha"},{"capital":"Tunis","code":"tn","continent":"Africa","flag_1x1":"flags/1x1/tn.svg","flag_4x3":"flags/4x3/tn.svg","iso":true,"name":"Tunisia"},{"capital":"Ashgabat","code":"tm","continent":"Asia","flag_1x1":"flags/1x1/tm.svg","flag_4x3":"flags/4x3/tm.svg","iso":true,"name":"Turkmenistan"},{"capital":"Cockburn Town","code":"tc","continent":"North America","flag_1x1":"flags/1x1/tc.svg","flag_4x3":"flags/4x3/tc.svg","iso":true,"name":"Turks and Caicos Islands"},{"capital":"Funafuti","code":"tv","continent":"Oceania","flag_1x1":"flags/1x1/tv.svg","flag_4x3":"flags/4x3/tv.svg","iso":true,"name":"Tuvalu"},{"capital":"Ankara","code":"tr","continent":"Asia","flag_1x1":"flags/1x1/tr.svg","flag_4x3":"flags/4x3/tr.svg","iso":true,"name":"Türkiye"},{"capital":"Kampala","code":"ug","continent":"Africa","flag_1x1":"flags/1x1/ug.svg","flag_4x3":"flags/4x3/ug.svg","iso":true,"name":"Uganda"},{"capital":"Kiev","code":"ua","continent":"Europe","flag_1x1":"flags/1x1/ua.svg","flag_4x3":"flags/4x3/ua.svg","iso":true,"name":"Ukraine"},{"capital":"Abu Dhabi","code":"ae","continent":"Asia","flag_1x1":"flags/1x1/ae.svg","flag_4x3":"flags/4x3/ae.svg","iso":true,"name":"United Arab Emirates"},{"capital":"London","code":"gb","continent":"Europe","flag_1x1":"flags/1x1/gb.svg","flag_4x3":"flags/4x3/gb.svg","iso":true,"name":"United Kingdom"},{"code":"un","flag_1x1":"flags/1x1/un.svg","flag_4x3":"flags/4x3/un.svg","iso":false,"name":"United Nations"},{"capital":"Washington, D.C.","code":"um","continent":"North America","flag_1x1":"flags/1x1/um.svg","flag_4x3":"flags/4x3/um.svg","iso":true,"name":"United States Minor Outlying Islands"},{"capital":"Washington, D.C.","code":"us","continent":"North America","flag_1x1":"flags/1x1/us.svg","flag_4x3":"flags/4x3/us.svg","iso":true,"name":"United States of America"},{"code":"xx","flag_1x1":"flags/1x1/xx.svg","flag_4x3":"flags/4x3/xx.svg","iso":false,"name":"Unknown"},{"capital":"Montevideo","code":"uy","continent":"South America","flag_1x1":"flags/1x1/uy.svg","flag_4x3":"flags/4x3/uy.svg","iso":true,"name":"Uruguay"},{"capital":"Tashkent","code":"uz","continent":"Asia","flag_1x1":"flags/1x1/uz.svg","flag_4x3":"flags/4x3/uz.svg","iso":true,"name":"Uzbekistan"},{"capital":"Port Vila","code":"vu","continent":"Oceania","flag_1x1":"flags/1x1/vu.svg","flag_4x3":"flags/4x3/vu.svg","iso":true,"name":"Vanuatu"},{"capital":"Caracas","code":"ve","continent":"South America","flag_1x1":"flags/1x1/ve.svg","flag_4x3":"flags/4x3/ve.svg","iso":true,"name":"Venezuela"},{"capital":"Hanoi","code":"vn","continent":"Asia","flag_1x1":"flags/1x1/vn.svg","flag_4x3":"flags/4x3/vn.svg","iso":true,"name":"Vietnam"},{"capital":"Road Town","code":"vg","continent":"North America","flag_1x1":"flags/1x1/vg.svg","flag_4x3":"flags/4x3/vg.svg","iso":true,"name":"Virgin Islands (British)"},{"capital":"Charlotte Amalie","code":"vi","continent":"North America","flag_1x1":"flags/1x1/vi.svg","flag_4x3":"flags/4x3/vi.svg","iso":true,"name":"Virgin Islands (U.S.)"},{"capital":"Cardiff","code":"gb-wls","continent":"Europe","flag_1x1":"flags/1x1/gb-wls.svg","flag_4x3":"flags/4x3/gb-wls.svg","iso":false,"name":"Wales"},{"capital":"Mata-Utu","code":"wf","continent":"Oceania","flag_1x1":"flags/1x1/wf.svg","flag_4x3":"flags/4x3/wf.svg","iso":true,"name":"Wallis and Futuna"},{"capital":"Laayoune","code":"eh","continent":"Africa","flag_1x1":"flags/1x1/eh.svg","flag_4x3":"flags/4x3/eh.svg","iso":true,"name":"Western Sahara"},{"capital":"Sana'a","code":"ye","continent":"Asia","flag_1x1":"flags/1x1/ye.svg","flag_4x3":"flags/4x3/ye.svg","iso":true,"name":"Yemen"},{"capital":"Lusaka","code":"zm","continent":"Africa","flag_1x1":"flags/1x1/zm.svg","flag_4x3":"flags/4x3/zm.svg","iso":true,"name":"Zambia"},{"capital":"Harare","code":"zw","continent":"Africa","flag_1x1":"flags/1x1/zw.svg","flag_4x3":"flags/4x3/zw.svg","iso":true,"name":"Zimbabwe"}],"temp":{"table1":{"Carrier":"<div class=\"col-img\"><div class=\"image\"> <img src=\"{{cimg}}\" alt=\"\"> </div><p class=\"text-sm\">{{Carrier}}</p></div>","Country":"<span class=\"text-muted\"><i class=\"fi fi-{{{code}}}\"></i> {{{Country}}}</span>","Shipment Date":"<span class=\"font-monospace\">{{Date}}</span>","Tracking Number":"<span class=\"text-decoration-none\">{{Tracking Number}}</span>","Order Name":"<a href=\"{{{link}}}\">{{Order Name}}</a>","Zone":"<span class=\"badge fw-semibold\" style=\"font-size: 14px; background-color: {{{color}}}; text-color: {{{text}}};\">{{Zone}}</span>","Group":"<span class=\"badge fw-semibold\" style=\"font-size: 14px; background-color: {{{color}}}; text-color: {{{text}}};\">{{Group}}</span>","Data":"<div class=\"text-wrap\"><p class=\"mb-0\">Orders: <small class=\"stats-figure\">{{Orders}}</small></p><p class=\"mb-0\">Cost: <small class=\"stats-figure\">{{Cost}}</small></p></div>"},"toolbar":{"toolbar1":"<div class=\"btn-group\" role=\"group\">{{#options}}{{#isbutton}}<input type=\"checkbox\" class=\"btn-check\" id=\"{{name}}-{{table}}\" name=\"{{name}}\" data-table=\"{{table}}\" autocomplete=\"off\"><label class=\"btn text-primary\" for=\"{{name}}-{{table}}\"><i class=\"{{icon}}\"></i></label>{{/isbutton}}{{#isgroup}}<div class=\"btn-group dropdown\" role=\"group\"><button class=\"btn text-primary dropdown-toggle\" data-bs-toggle=\"dropdown\" aria-expanded=\"false\" data-bs-auto-close=\"outside\"><i class=\"{{icon}}\"></i></button><div class=\"dropdown-menu px-4 py-3\"><p class=\"fw-semibold\">{{name}}</p>{{#values}}<label class=\"form-check-label ms-3 text-nowrap\"><input class=\"form-check-input\" type=\"{{#itype}}{{.}}{{/itype}}{{^itype}}checkbox{{/itype}}\" value=\"{{value}}\" name=\"{{name}}\" data-table=\"{{table}}\"  {{#selected}}checked{{/selected}}> {{label}}</label>{{/values}}</div></div>{{/isgroup}}{{/options}}</div>","ftoolbar":"<form class=\"row g-3 mb-4 align-items-center justify-content-between\" data-table=\"{{table}}\">    {{#options}}    {{#isDate}}    <div class=\"col-md-3 col-12\">    <label for=\"{{name}}\" class=\"form-text\">{{label}} (<span class=\"fw-bold text-primary date-text\">{{text}}</span>)</label>    <input type=\"text\" name=\"{{name}}\" id=\"{{name}}\" class=\"form-control date\" value=\"{{value}}\">    </div>    {{/isDate}}    {{#isSelect}}    <div class=\"col-md-3 dropdown\">        <label for=\"{{name}}\" class=\"form-text\">{{label}}</label>          <button type=\"button\" id=\"{{name}}\" class=\"form-control dropdown-toggle\" data-bs-toggle=\"dropdown\" data-bs-auto-close=\"outside\" aria-expanded=\"false\">                <span class=\"len\">{{len}}</span> chosen          </button>         <div class=\"dropdown-menu px-4 py-3\">     \t\t\t\t\t                     <input type=\"text\"  data-target=\"{{name}}\" data-table=\"{{table}}\" id=\"{{name}}-search\" name=\"search\" class=\"form-control form-control-sm search\" placeholder=\"Search\">  <div class=\"form-check pt-2\">    \t<label class=\"form-check-label ms-3\" for=\"{{name}}-all\"><input class=\"form-check-input all\" type=\"checkbox\" data-target=\"{{name}}\" data-table=\"{{table}}\" id=\"{{name}}-all\" {{#all}}checked{{/all}}> Toggle All</label>    \t </div>    \t<div class=\"dropdown-divider\"></div> <div class=\"overflow-scroll\" style=\"max-height: 200px;\">        \t{{#values}}          <div class=\"form-check\">    \t<input class=\"form-check-input\" type=\"checkbox\" id=\"{{value}}\" name=\"{{name}}\" data-table=\"{{table}}\" value=\"{{value}}\" {{#selected}}checked{{/selected}}><label class=\"form-check-label  ms-3\" for=\"{{value}}\"> {{label}}</label>  </div>    \t{{/values}}    </div>  </div>     </div>    {{/isSelect}}    {{/options}}    <div class=\"col-md-3 col-12 d-grid gap-2 d-md-block align-self-end\">    <div class=\"btn-group btn-group-sm\" role=\"group\">    <button type=\"submit\" class=\"btn btn-success\"><i class=\"fa-solid fa-check\"></i> Apply</button>    <button type=\"reset\" class=\"btn btn-info\"><i class=\"fa-solid fa-ban\"></i> Clear</button>      </div>       </div>    </form>"}}};
+var Data = {"data":{"fparams":{"default":[null,{"type":"date/all-options","value":"thismonth","id":"28c64a1","target":["dimension",["field",1025,null]]},{"type":"string/=","value":[],"id":"77ea5bfb","target":["dimension",["field",1020,null]]},{"type":"string/=","value":[],"id":"c03f6580","target":["dimension",["field",1022,null]]}],"columns":{"Carrier":"77ea5bfb","Country":"c03f6580","Shipment Date":"28c64a1"},"endpoint":"https://metabase.gearment.com/api/dashboard/43/dashcard/385/card/387/query/json","filter":{"Shipment Date":"thismonth"},"options":{"method":"POST","headers":{"Accept":"application/json","Content-Type":"application/json","X-Metabase-Session":"a1d8de9a-4397-4f95-b53b-1c27df6c6487"}},"params":[{"type":"date/all-options","value":"thismonth","id":"28c64a1","target":["dimension",["field",1025,null]]}],"url":"https://metabase.gearment.com/api/dashboard/43/dashcard/385/card/387/query/json?parameters=%5B%7B%22type%22%3A%22date%2Fall-options%22%2C%22value%22%3A%22thismonth%22%2C%22id%22%3A%2228c64a1%22%2C%22target%22%3A%5B%22dimension%22%2C%5B%22field%22%2C1025%2Cnull%5D%5D%7D%5D"},"columns":[{"name":"Carrier","label":"Carrier","value":"","values":[[""],["DHLECS"],["DHLGlobalMail"],["DHLGlobalmailInt"],["DhlEcs"],["FEDEX"],["FEDEXCROSSBORDER"],["FedEx"],["FedExCrossBorder"],["OSMWorldwide"],["UPS"],["USPS"]]},{"name":"Country","label":"Country","value":"","values":[[null],["Afghanistan"],["Albania"],["Algeria"],["American Samoa"],["Andorra"],["Angola"],["Anguilla"],["Argentina"],["Armenia"],["Aruba"],["Australia"],["Austria"],["Azerbaijan"],["Bahamas The"],["Bahrain"],["Bangladesh"],["Barbados"],["Belarus"],["Belgium"],["Belize"],["Bermuda"],["Bosnia and Herzegovina"],["Brazil"],["British Indian Ocean Territory"],["Bulgaria"],["Burkina Faso"],["Cambodia"],["Cameroon"],["Canada"],["Cape Verde"],["Chile"],["China"],["Colombia"],["Congo The Democratic Republic Of The"],["Costa Rica"],["Croatia (Hrvatska)"],["Cyprus"],["Czech Republic"],["Denmark"],["Djibouti"],["Dominican Republic"],["Ecuador"],["Egypt"],["El Salvador"],["Estonia"],["Ethiopia"],["Falkland Islands"],["Faroe Islands"],["Fiji Islands"],["Finland"],["France"],["French Polynesia"],["Gabon"],["Georgia"],["Germany"],["Ghana"],["Gibraltar"],["Greece"],["Greenland"],["Grenada"],["Guadeloupe"],["Guam"],["Guatemala"],["Guernsey"],["Guyana"],["Hong Kong S.A.R."],["Hungary"],["Iceland"],["India"],["Indonesia"],["Iraq"],["Ireland"],["Israel"],["Italy"],["Jamaica"],["Japan"],["Jersey"],["Jordan"],["Kazakhstan"],["Kenya"],["Korea South"],["Kuwait"],["Latvia"],["Lebanon"],["Liechtenstein"],["Lithuania"],["Luxembourg"],["Macau S.A.R."],["Macedonia"],["Malawi"],["Malaysia"],["Maldives"],["Malta"],["Man (Isle of)"],["Marshall Islands"],["Martinique"],["Mayotte"],["Mexico"],["Moldova"],["Monaco"],["Montenegro"],["Morocco"],["Mozambique"],["Namibia"],["Nepal"],["Netherlands"],["New Caledonia"],["New Zealand"],["Niger"],["Nigeria"],["Northern Mariana Islands"],["Norway"],["Oman"],["Pakistan"],["Palau"],["Panama"],["Papua new Guinea"],["Paraguay"],["Peru"],["Philippines"],["Poland"],["Portugal"],["Puerto Rico"],["Qatar"],["Reunion"],["Romania"],["Russia"],["Rwanda"],["Saint Lucia"],["Saint Pierre and Miquelon"],["Saudi Arabia"],["Serbia"],["Sierra Leone"],["Singapore"],["Slovakia"],["Slovenia"],["South Africa"],["Spain"],["Sri Lanka"],["Svalbard And Jan Mayen Islands"],["Swaziland"],["Sweden"],["Switzerland"],["Taiwan"],["Tanzania"],["Thailand"],["Togo"],["Turkey"],["Turks And Caicos Islands"],["Tuvalu"],["Uganda"],["Ukraine"],["United Arab Emirates"],["United Kingdom"],["United States"],["United States Minor Outlying Islands"],["Uruguay"],["Vanuatu"],["Vietnam"],["Virgin Islands (US)"],["Zambia"],["Zimbabwe"]]},{"name":"Shipment Date","label":"Date","text":"This Month","value":"6/1/24 - 6/7/24","values":false}],"fdata":{"url":"https://script.google.com/a/macros/gearment.com/s/AKfycby3gGAyjC0FyxoZ8y00Wt_zMJ1MDOhfPEv9fwpBQunt3CGv-6R96VoJHdR_5En1qepMbw/exec","params":{"func":"Request","params":{"default":[null,{"type":"date/all-options","value":"thismonth","id":"28c64a1","target":["dimension",["field",1025,null]]},{"type":"string/=","value":[],"id":"77ea5bfb","target":["dimension",["field",1020,null]]},{"type":"string/=","value":[],"id":"c03f6580","target":["dimension",["field",1022,null]]}],"columns":{"Carrier":"77ea5bfb","Country":"c03f6580","Shipment Date":"28c64a1"},"endpoint":"https://metabase.gearment.com/api/dashboard/43/dashcard/385/card/387/query/json","filter":{"Shipment Date":"thismonth"},"options":{"method":"POST","headers":{"Accept":"application/json","Content-Type":"application/json","X-Metabase-Session":"a1d8de9a-4397-4f95-b53b-1c27df6c6487"}},"params":[{"type":"date/all-options","value":"thismonth","id":"28c64a1","target":["dimension",["field",1025,null]]}],"url":"https://metabase.gearment.com/api/dashboard/43/dashcard/385/card/387/query/json?parameters=%5B%7B%22type%22%3A%22date%2Fall-options%22%2C%22value%22%3A%22thismonth%22%2C%22id%22%3A%2228c64a1%22%2C%22target%22%3A%5B%22dimension%22%2C%5B%22field%22%2C1025%2Cnull%5D%5D%7D%5D"}}},"url":"https://script.google.com/a/macros/gearment.com/s/AKfycby3gGAyjC0FyxoZ8y00Wt_zMJ1MDOhfPEv9fwpBQunt3CGv-6R96VoJHdR_5En1qepMbw/exec?func=Request&params=%7B%22default%22%3A%5Bnull%2C%7B%22type%22%3A%22date%2Fall-options%22%2C%22value%22%3A%22thismonth%22%2C%22id%22%3A%2228c64a1%22%2C%22target%22%3A%5B%22dimension%22%2C%5B%22field%22%2C1025%2Cnull%5D%5D%7D%2C%7B%22type%22%3A%22string%2F%3D%22%2C%22value%22%3A%5B%5D%2C%22id%22%3A%2277ea5bfb%22%2C%22target%22%3A%5B%22dimension%22%2C%5B%22field%22%2C1020%2Cnull%5D%5D%7D%2C%7B%22type%22%3A%22string%2F%3D%22%2C%22value%22%3A%5B%5D%2C%22id%22%3A%22c03f6580%22%2C%22target%22%3A%5B%22dimension%22%2C%5B%22field%22%2C1022%2Cnull%5D%5D%7D%5D%2C%22columns%22%3A%7B%22Carrier%22%3A%2277ea5bfb%22%2C%22Country%22%3A%22c03f6580%22%2C%22Shipment%20Date%22%3A%2228c64a1%22%7D%2C%22endpoint%22%3A%22https%3A%2F%2Fmetabase.gearment.com%2Fapi%2Fdashboard%2F43%2Fdashcard%2F385%2Fcard%2F387%2Fquery%2Fjson%22%2C%22filter%22%3A%7B%22Shipment%20Date%22%3A%22thismonth%22%7D%2C%22options%22%3A%7B%22method%22%3A%22POST%22%2C%22headers%22%3A%7B%22Accept%22%3A%22application%2Fjson%22%2C%22Content-Type%22%3A%22application%2Fjson%22%2C%22X-Metabase-Session%22%3A%22a1d8de9a-4397-4f95-b53b-1c27df6c6487%22%7D%7D%2C%22params%22%3A%5B%7B%22type%22%3A%22date%2Fall-options%22%2C%22value%22%3A%22thismonth%22%2C%22id%22%3A%2228c64a1%22%2C%22target%22%3A%5B%22dimension%22%2C%5B%22field%22%2C1025%2Cnull%5D%5D%7D%5D%2C%22url%22%3A%22https%3A%2F%2Fmetabase.gearment.com%2Fapi%2Fdashboard%2F43%2Fdashcard%2F385%2Fcard%2F387%2Fquery%2Fjson%3Fparameters%3D%255B%257B%2522type%2522%253A%2522date%252Fall-options%2522%252C%2522value%2522%253A%2522thismonth%2522%252C%2522id%2522%253A%252228c64a1%2522%252C%2522target%2522%253A%255B%2522dimension%2522%252C%255B%2522field%2522%252C1025%252Cnull%255D%255D%257D%255D%22%7D"},"countries":[{"capital":"Kabul","code":"af","continent":"Asia","flag_1x1":"flags/1x1/af.svg","flag_4x3":"flags/4x3/af.svg","iso":true,"name":"Afghanistan"},{"capital":"Mariehamn","code":"ax","continent":"Europe","flag_1x1":"flags/1x1/ax.svg","flag_4x3":"flags/4x3/ax.svg","iso":true,"name":"Aland Islands"},{"capital":"Tirana","code":"al","continent":"Europe","flag_1x1":"flags/1x1/al.svg","flag_4x3":"flags/4x3/al.svg","iso":true,"name":"Albania"},{"capital":"Algiers","code":"dz","continent":"Africa","flag_1x1":"flags/1x1/dz.svg","flag_4x3":"flags/4x3/dz.svg","iso":true,"name":"Algeria"},{"capital":"Pago Pago","code":"as","continent":"Oceania","flag_1x1":"flags/1x1/as.svg","flag_4x3":"flags/4x3/as.svg","iso":true,"name":"American Samoa"},{"capital":"Andorra la Vella","code":"ad","continent":"Europe","flag_1x1":"flags/1x1/ad.svg","flag_4x3":"flags/4x3/ad.svg","iso":true,"name":"Andorra"},{"capital":"Luanda","code":"ao","continent":"Africa","flag_1x1":"flags/1x1/ao.svg","flag_4x3":"flags/4x3/ao.svg","iso":true,"name":"Angola"},{"capital":"The Valley","code":"ai","continent":"North America","flag_1x1":"flags/1x1/ai.svg","flag_4x3":"flags/4x3/ai.svg","iso":true,"name":"Anguilla"},{"code":"aq","flag_1x1":"flags/1x1/aq.svg","flag_4x3":"flags/4x3/aq.svg","iso":true,"name":"Antarctica"},{"capital":"St. John's","code":"ag","continent":"North America","flag_1x1":"flags/1x1/ag.svg","flag_4x3":"flags/4x3/ag.svg","iso":true,"name":"Antigua and Barbuda"},{"capital":"Buenos Aires","code":"ar","continent":"South America","flag_1x1":"flags/1x1/ar.svg","flag_4x3":"flags/4x3/ar.svg","iso":true,"name":"Argentina"},{"capital":"Yerevan","code":"am","continent":"Asia","flag_1x1":"flags/1x1/am.svg","flag_4x3":"flags/4x3/am.svg","iso":true,"name":"Armenia"},{"capital":"Oranjestad","code":"aw","continent":"South America","flag_1x1":"flags/1x1/aw.svg","flag_4x3":"flags/4x3/aw.svg","iso":true,"name":"Aruba"},{"capital":"Georgetown","code":"sh-ac","continent":"Africa","flag_1x1":"flags/1x1/sh-ac.svg","flag_4x3":"flags/4x3/sh-ac.svg","iso":false,"name":"Ascension Island"},{"capital":"Canberra","code":"au","continent":"Oceania","flag_1x1":"flags/1x1/au.svg","flag_4x3":"flags/4x3/au.svg","iso":true,"name":"Australia"},{"capital":"Vienna","code":"at","continent":"Europe","flag_1x1":"flags/1x1/at.svg","flag_4x3":"flags/4x3/at.svg","iso":true,"name":"Austria"},{"capital":"Baku","code":"az","continent":"Asia","flag_1x1":"flags/1x1/az.svg","flag_4x3":"flags/4x3/az.svg","iso":true,"name":"Azerbaijan"},{"capital":"Nassau","code":"bs","continent":"North America","flag_1x1":"flags/1x1/bs.svg","flag_4x3":"flags/4x3/bs.svg","iso":true,"name":"Bahamas"},{"capital":"Manama","code":"bh","continent":"Asia","flag_1x1":"flags/1x1/bh.svg","flag_4x3":"flags/4x3/bh.svg","iso":true,"name":"Bahrain"},{"capital":"Dhaka","code":"bd","continent":"Asia","flag_1x1":"flags/1x1/bd.svg","flag_4x3":"flags/4x3/bd.svg","iso":true,"name":"Bangladesh"},{"capital":"Bridgetown","code":"bb","continent":"North America","flag_1x1":"flags/1x1/bb.svg","flag_4x3":"flags/4x3/bb.svg","iso":true,"name":"Barbados"},{"code":"es-pv","flag_1x1":"flags/1x1/es-pv.svg","flag_4x3":"flags/4x3/es-pv.svg","iso":false,"name":"Basque Country"},{"capital":"Minsk","code":"by","continent":"Europe","flag_1x1":"flags/1x1/by.svg","flag_4x3":"flags/4x3/by.svg","iso":true,"name":"Belarus"},{"capital":"Brussels","code":"be","continent":"Europe","flag_1x1":"flags/1x1/be.svg","flag_4x3":"flags/4x3/be.svg","iso":true,"name":"Belgium"},{"capital":"Belmopan","code":"bz","continent":"North America","flag_1x1":"flags/1x1/bz.svg","flag_4x3":"flags/4x3/bz.svg","iso":true,"name":"Belize"},{"capital":"Porto-Novo","code":"bj","continent":"Africa","flag_1x1":"flags/1x1/bj.svg","flag_4x3":"flags/4x3/bj.svg","iso":true,"name":"Benin"},{"capital":"Hamilton","code":"bm","continent":"North America","flag_1x1":"flags/1x1/bm.svg","flag_4x3":"flags/4x3/bm.svg","iso":true,"name":"Bermuda"},{"capital":"Thimphu","code":"bt","continent":"Asia","flag_1x1":"flags/1x1/bt.svg","flag_4x3":"flags/4x3/bt.svg","iso":true,"name":"Bhutan"},{"capital":"Sucre","code":"bo","continent":"South America","flag_1x1":"flags/1x1/bo.svg","flag_4x3":"flags/4x3/bo.svg","iso":true,"name":"Bolivia"},{"capital":"Kralendijk","code":"bq","continent":"South America","flag_1x1":"flags/1x1/bq.svg","flag_4x3":"flags/4x3/bq.svg","iso":true,"name":"Bonaire, Sint Eustatius and Saba"},{"capital":"Sarajevo","code":"ba","continent":"Europe","flag_1x1":"flags/1x1/ba.svg","flag_4x3":"flags/4x3/ba.svg","iso":true,"name":"Bosnia and Herzegovina"},{"capital":"Gaborone","code":"bw","continent":"Africa","flag_1x1":"flags/1x1/bw.svg","flag_4x3":"flags/4x3/bw.svg","iso":true,"name":"Botswana"},{"code":"bv","flag_1x1":"flags/1x1/bv.svg","flag_4x3":"flags/4x3/bv.svg","iso":true,"name":"Bouvet Island"},{"capital":"Brasília","code":"br","continent":"South America","flag_1x1":"flags/1x1/br.svg","flag_4x3":"flags/4x3/br.svg","iso":true,"name":"Brazil"},{"capital":"Diego Garcia","code":"io","continent":"Asia","flag_1x1":"flags/1x1/io.svg","flag_4x3":"flags/4x3/io.svg","iso":true,"name":"British Indian Ocean Territory"},{"capital":"Bandar Seri Begawan","code":"bn","continent":"Asia","flag_1x1":"flags/1x1/bn.svg","flag_4x3":"flags/4x3/bn.svg","iso":true,"name":"Brunei Darussalam"},{"capital":"Sofia","code":"bg","continent":"Europe","flag_1x1":"flags/1x1/bg.svg","flag_4x3":"flags/4x3/bg.svg","iso":true,"name":"Bulgaria"},{"capital":"Ouagadougou","code":"bf","continent":"Africa","flag_1x1":"flags/1x1/bf.svg","flag_4x3":"flags/4x3/bf.svg","iso":true,"name":"Burkina Faso"},{"capital":"Bujumbura","code":"bi","continent":"Africa","flag_1x1":"flags/1x1/bi.svg","flag_4x3":"flags/4x3/bi.svg","iso":true,"name":"Burundi"},{"capital":"Praia","code":"cv","continent":"Africa","flag_1x1":"flags/1x1/cv.svg","flag_4x3":"flags/4x3/cv.svg","iso":true,"name":"Cabo Verde"},{"capital":"Phnom Penh","code":"kh","continent":"Asia","flag_1x1":"flags/1x1/kh.svg","flag_4x3":"flags/4x3/kh.svg","iso":true,"name":"Cambodia"},{"capital":"Yaoundé","code":"cm","continent":"Africa","flag_1x1":"flags/1x1/cm.svg","flag_4x3":"flags/4x3/cm.svg","iso":true,"name":"Cameroon"},{"capital":"Ottawa","code":"ca","continent":"North America","flag_1x1":"flags/1x1/ca.svg","flag_4x3":"flags/4x3/ca.svg","iso":true,"name":"Canada"},{"code":"ic","flag_1x1":"flags/1x1/ic.svg","flag_4x3":"flags/4x3/ic.svg","iso":false,"name":"Canary Islands"},{"code":"es-ct","flag_1x1":"flags/1x1/es-ct.svg","flag_4x3":"flags/4x3/es-ct.svg","iso":false,"name":"Catalonia"},{"capital":"George Town","code":"ky","continent":"North America","flag_1x1":"flags/1x1/ky.svg","flag_4x3":"flags/4x3/ky.svg","iso":true,"name":"Cayman Islands"},{"capital":"Bangui","code":"cf","continent":"Africa","flag_1x1":"flags/1x1/cf.svg","flag_4x3":"flags/4x3/cf.svg","iso":true,"name":"Central African Republic"},{"code":"cefta","flag_1x1":"flags/1x1/cefta.svg","flag_4x3":"flags/4x3/cefta.svg","iso":false,"name":"Central European Free Trade Agreement"},{"capital":"N'Djamena","code":"td","continent":"Africa","flag_1x1":"flags/1x1/td.svg","flag_4x3":"flags/4x3/td.svg","iso":true,"name":"Chad"},{"capital":"Santiago","code":"cl","continent":"South America","flag_1x1":"flags/1x1/cl.svg","flag_4x3":"flags/4x3/cl.svg","iso":true,"name":"Chile"},{"capital":"Beijing","code":"cn","continent":"Asia","flag_1x1":"flags/1x1/cn.svg","flag_4x3":"flags/4x3/cn.svg","iso":true,"name":"China"},{"capital":"Flying Fish Cove","code":"cx","continent":"Asia","flag_1x1":"flags/1x1/cx.svg","flag_4x3":"flags/4x3/cx.svg","iso":true,"name":"Christmas Island"},{"code":"cp","flag_1x1":"flags/1x1/cp.svg","flag_4x3":"flags/4x3/cp.svg","iso":false,"name":"Clipperton Island"},{"capital":"West Island","code":"cc","continent":"Asia","flag_1x1":"flags/1x1/cc.svg","flag_4x3":"flags/4x3/cc.svg","iso":true,"name":"Cocos (Keeling) Islands"},{"capital":"Bogotá","code":"co","continent":"South America","flag_1x1":"flags/1x1/co.svg","flag_4x3":"flags/4x3/co.svg","iso":true,"name":"Colombia"},{"capital":"Moroni","code":"km","continent":"Africa","flag_1x1":"flags/1x1/km.svg","flag_4x3":"flags/4x3/km.svg","iso":true,"name":"Comoros"},{"capital":"Avarua","code":"ck","continent":"Oceania","flag_1x1":"flags/1x1/ck.svg","flag_4x3":"flags/4x3/ck.svg","iso":true,"name":"Cook Islands"},{"capital":"San José","code":"cr","continent":"North America","flag_1x1":"flags/1x1/cr.svg","flag_4x3":"flags/4x3/cr.svg","iso":true,"name":"Costa Rica"},{"capital":"Zagreb","code":"hr","continent":"Europe","flag_1x1":"flags/1x1/hr.svg","flag_4x3":"flags/4x3/hr.svg","iso":true,"name":"Croatia"},{"capital":"Havana","code":"cu","continent":"North America","flag_1x1":"flags/1x1/cu.svg","flag_4x3":"flags/4x3/cu.svg","iso":true,"name":"Cuba"},{"capital":"Willemstad","code":"cw","continent":"South America","flag_1x1":"flags/1x1/cw.svg","flag_4x3":"flags/4x3/cw.svg","iso":true,"name":"Curaçao"},{"capital":"Nicosia","code":"cy","continent":"Europe","flag_1x1":"flags/1x1/cy.svg","flag_4x3":"flags/4x3/cy.svg","iso":true,"name":"Cyprus"},{"capital":"Prague","code":"cz","continent":"Europe","flag_1x1":"flags/1x1/cz.svg","flag_4x3":"flags/4x3/cz.svg","iso":true,"name":"Czech Republic"},{"capital":"Yamoussoukro","code":"ci","continent":"Africa","flag_1x1":"flags/1x1/ci.svg","flag_4x3":"flags/4x3/ci.svg","iso":true,"name":"Côte d'Ivoire"},{"capital":"Kinshasa","code":"cd","continent":"Africa","flag_1x1":"flags/1x1/cd.svg","flag_4x3":"flags/4x3/cd.svg","iso":true,"name":"Democratic Republic of the Congo"},{"capital":"Copenhagen","code":"dk","continent":"Europe","flag_1x1":"flags/1x1/dk.svg","flag_4x3":"flags/4x3/dk.svg","iso":true,"name":"Denmark"},{"code":"dg","flag_1x1":"flags/1x1/dg.svg","flag_4x3":"flags/4x3/dg.svg","iso":false,"name":"Diego Garcia"},{"capital":"Djibouti","code":"dj","continent":"Africa","flag_1x1":"flags/1x1/dj.svg","flag_4x3":"flags/4x3/dj.svg","iso":true,"name":"Djibouti"},{"capital":"Roseau","code":"dm","continent":"North America","flag_1x1":"flags/1x1/dm.svg","flag_4x3":"flags/4x3/dm.svg","iso":true,"name":"Dominica"},{"capital":"Santo Domingo","code":"do","continent":"North America","flag_1x1":"flags/1x1/do.svg","flag_4x3":"flags/4x3/do.svg","iso":true,"name":"Dominican Republic"},{"code":"eac","flag_1x1":"flags/1x1/eac.svg","flag_4x3":"flags/4x3/eac.svg","iso":false,"name":"East African Community"},{"capital":"Quito","code":"ec","continent":"South America","flag_1x1":"flags/1x1/ec.svg","flag_4x3":"flags/4x3/ec.svg","iso":true,"name":"Ecuador"},{"capital":"Cairo","code":"eg","continent":"Africa","flag_1x1":"flags/1x1/eg.svg","flag_4x3":"flags/4x3/eg.svg","iso":true,"name":"Egypt"},{"capital":"San Salvador","code":"sv","continent":"North America","flag_1x1":"flags/1x1/sv.svg","flag_4x3":"flags/4x3/sv.svg","iso":true,"name":"El Salvador"},{"capital":"London","code":"gb-eng","continent":"Europe","flag_1x1":"flags/1x1/gb-eng.svg","flag_4x3":"flags/4x3/gb-eng.svg","iso":false,"name":"England"},{"capital":"Malabo","code":"gq","continent":"Africa","flag_1x1":"flags/1x1/gq.svg","flag_4x3":"flags/4x3/gq.svg","iso":true,"name":"Equatorial Guinea"},{"capital":"Asmara","code":"er","continent":"Africa","flag_1x1":"flags/1x1/er.svg","flag_4x3":"flags/4x3/er.svg","iso":true,"name":"Eritrea"},{"capital":"Tallinn","code":"ee","continent":"Europe","flag_1x1":"flags/1x1/ee.svg","flag_4x3":"flags/4x3/ee.svg","iso":true,"name":"Estonia"},{"capital":"Lobamba, Mbabane","code":"sz","continent":"Africa","flag_1x1":"flags/1x1/sz.svg","flag_4x3":"flags/4x3/sz.svg","iso":true,"name":"Eswatini"},{"capital":"Addis Ababa","code":"et","continent":"Africa","flag_1x1":"flags/1x1/et.svg","flag_4x3":"flags/4x3/et.svg","iso":true,"name":"Ethiopia"},{"code":"eu","flag_1x1":"flags/1x1/eu.svg","flag_4x3":"flags/4x3/eu.svg","iso":false,"name":"Europe"},{"capital":"Stanley","code":"fk","continent":"South America","flag_1x1":"flags/1x1/fk.svg","flag_4x3":"flags/4x3/fk.svg","iso":true,"name":"Falkland Islands"},{"capital":"Tórshavn","code":"fo","continent":"Europe","flag_1x1":"flags/1x1/fo.svg","flag_4x3":"flags/4x3/fo.svg","iso":true,"name":"Faroe Islands"},{"capital":"Palikir","code":"fm","continent":"Oceania","flag_1x1":"flags/1x1/fm.svg","flag_4x3":"flags/4x3/fm.svg","iso":true,"name":"Federated States of Micronesia"},{"capital":"Suva","code":"fj","continent":"Oceania","flag_1x1":"flags/1x1/fj.svg","flag_4x3":"flags/4x3/fj.svg","iso":true,"name":"Fiji"},{"capital":"Helsinki","code":"fi","continent":"Europe","flag_1x1":"flags/1x1/fi.svg","flag_4x3":"flags/4x3/fi.svg","iso":true,"name":"Finland"},{"capital":"Paris","code":"fr","continent":"Europe","flag_1x1":"flags/1x1/fr.svg","flag_4x3":"flags/4x3/fr.svg","iso":true,"name":"France"},{"capital":"Cayenne","code":"gf","continent":"South America","flag_1x1":"flags/1x1/gf.svg","flag_4x3":"flags/4x3/gf.svg","iso":true,"name":"French Guiana"},{"capital":"Papeete","code":"pf","continent":"Oceania","flag_1x1":"flags/1x1/pf.svg","flag_4x3":"flags/4x3/pf.svg","iso":true,"name":"French Polynesia"},{"capital":"Saint-Pierre, Réunion","code":"tf","continent":"Africa","flag_1x1":"flags/1x1/tf.svg","flag_4x3":"flags/4x3/tf.svg","iso":true,"name":"French Southern Territories"},{"capital":"Libreville","code":"ga","continent":"Africa","flag_1x1":"flags/1x1/ga.svg","flag_4x3":"flags/4x3/ga.svg","iso":true,"name":"Gabon"},{"code":"es-ga","flag_1x1":"flags/1x1/es-ga.svg","flag_4x3":"flags/4x3/es-ga.svg","iso":false,"name":"Galicia"},{"capital":"Banjul","code":"gm","continent":"Africa","flag_1x1":"flags/1x1/gm.svg","flag_4x3":"flags/4x3/gm.svg","iso":true,"name":"Gambia"},{"capital":"Tbilisi","code":"ge","continent":"Asia","flag_1x1":"flags/1x1/ge.svg","flag_4x3":"flags/4x3/ge.svg","iso":true,"name":"Georgia"},{"capital":"Berlin","code":"de","continent":"Europe","flag_1x1":"flags/1x1/de.svg","flag_4x3":"flags/4x3/de.svg","iso":true,"name":"Germany"},{"capital":"Accra","code":"gh","continent":"Africa","flag_1x1":"flags/1x1/gh.svg","flag_4x3":"flags/4x3/gh.svg","iso":true,"name":"Ghana"},{"capital":"Gibraltar","code":"gi","continent":"Europe","flag_1x1":"flags/1x1/gi.svg","flag_4x3":"flags/4x3/gi.svg","iso":true,"name":"Gibraltar"},{"capital":"Athens","code":"gr","continent":"Europe","flag_1x1":"flags/1x1/gr.svg","flag_4x3":"flags/4x3/gr.svg","iso":true,"name":"Greece"},{"capital":"Nuuk","code":"gl","continent":"North America","flag_1x1":"flags/1x1/gl.svg","flag_4x3":"flags/4x3/gl.svg","iso":true,"name":"Greenland"},{"capital":"St. George's","code":"gd","continent":"North America","flag_1x1":"flags/1x1/gd.svg","flag_4x3":"flags/4x3/gd.svg","iso":true,"name":"Grenada"},{"capital":"Basse-Terre","code":"gp","continent":"North America","flag_1x1":"flags/1x1/gp.svg","flag_4x3":"flags/4x3/gp.svg","iso":true,"name":"Guadeloupe"},{"capital":"Hagåtña","code":"gu","continent":"Oceania","flag_1x1":"flags/1x1/gu.svg","flag_4x3":"flags/4x3/gu.svg","iso":true,"name":"Guam"},{"capital":"Guatemala City","code":"gt","continent":"North America","flag_1x1":"flags/1x1/gt.svg","flag_4x3":"flags/4x3/gt.svg","iso":true,"name":"Guatemala"},{"capital":"Saint Peter Port","code":"gg","continent":"Europe","flag_1x1":"flags/1x1/gg.svg","flag_4x3":"flags/4x3/gg.svg","iso":true,"name":"Guernsey"},{"capital":"Conakry","code":"gn","continent":"Africa","flag_1x1":"flags/1x1/gn.svg","flag_4x3":"flags/4x3/gn.svg","iso":true,"name":"Guinea"},{"capital":"Bissau","code":"gw","continent":"Africa","flag_1x1":"flags/1x1/gw.svg","flag_4x3":"flags/4x3/gw.svg","iso":true,"name":"Guinea-Bissau"},{"capital":"Georgetown","code":"gy","continent":"South America","flag_1x1":"flags/1x1/gy.svg","flag_4x3":"flags/4x3/gy.svg","iso":true,"name":"Guyana"},{"capital":"Port-au-Prince","code":"ht","continent":"North America","flag_1x1":"flags/1x1/ht.svg","flag_4x3":"flags/4x3/ht.svg","iso":true,"name":"Haiti"},{"code":"hm","flag_1x1":"flags/1x1/hm.svg","flag_4x3":"flags/4x3/hm.svg","iso":true,"name":"Heard Island and McDonald Islands"},{"capital":"Vatican City","code":"va","continent":"Europe","flag_1x1":"flags/1x1/va.svg","flag_4x3":"flags/4x3/va.svg","iso":true,"name":"Holy See"},{"capital":"Tegucigalpa","code":"hn","continent":"North America","flag_1x1":"flags/1x1/hn.svg","flag_4x3":"flags/4x3/hn.svg","iso":true,"name":"Honduras"},{"capital":"Hong Kong","code":"hk","continent":"Asia","flag_1x1":"flags/1x1/hk.svg","flag_4x3":"flags/4x3/hk.svg","iso":true,"name":"Hong Kong"},{"capital":"Budapest","code":"hu","continent":"Europe","flag_1x1":"flags/1x1/hu.svg","flag_4x3":"flags/4x3/hu.svg","iso":true,"name":"Hungary"},{"capital":"Reykjavik","code":"is","continent":"Europe","flag_1x1":"flags/1x1/is.svg","flag_4x3":"flags/4x3/is.svg","iso":true,"name":"Iceland"},{"capital":"New Delhi","code":"in","continent":"Asia","flag_1x1":"flags/1x1/in.svg","flag_4x3":"flags/4x3/in.svg","iso":true,"name":"India"},{"capital":"Jakarta","code":"id","continent":"Asia","flag_1x1":"flags/1x1/id.svg","flag_4x3":"flags/4x3/id.svg","iso":true,"name":"Indonesia"},{"capital":"Tehran","code":"ir","continent":"Asia","flag_1x1":"flags/1x1/ir.svg","flag_4x3":"flags/4x3/ir.svg","iso":true,"name":"Iran"},{"capital":"Baghdad","code":"iq","continent":"Asia","flag_1x1":"flags/1x1/iq.svg","flag_4x3":"flags/4x3/iq.svg","iso":true,"name":"Iraq"},{"capital":"Dublin","code":"ie","continent":"Europe","flag_1x1":"flags/1x1/ie.svg","flag_4x3":"flags/4x3/ie.svg","iso":true,"name":"Ireland"},{"capital":"Douglas","code":"im","continent":"Europe","flag_1x1":"flags/1x1/im.svg","flag_4x3":"flags/4x3/im.svg","iso":true,"name":"Isle of Man"},{"capital":"Jerusalem","code":"il","continent":"Asia","flag_1x1":"flags/1x1/il.svg","flag_4x3":"flags/4x3/il.svg","iso":true,"name":"Israel"},{"capital":"Rome","code":"it","continent":"Europe","flag_1x1":"flags/1x1/it.svg","flag_4x3":"flags/4x3/it.svg","iso":true,"name":"Italy"},{"capital":"Kingston","code":"jm","continent":"North America","flag_1x1":"flags/1x1/jm.svg","flag_4x3":"flags/4x3/jm.svg","iso":true,"name":"Jamaica"},{"capital":"Tokyo","code":"jp","continent":"Asia","flag_1x1":"flags/1x1/jp.svg","flag_4x3":"flags/4x3/jp.svg","iso":true,"name":"Japan"},{"capital":"Saint Helier","code":"je","continent":"Europe","flag_1x1":"flags/1x1/je.svg","flag_4x3":"flags/4x3/je.svg","iso":true,"name":"Jersey"},{"capital":"Amman","code":"jo","continent":"Asia","flag_1x1":"flags/1x1/jo.svg","flag_4x3":"flags/4x3/jo.svg","iso":true,"name":"Jordan"},{"capital":"Astana","code":"kz","continent":"Asia","flag_1x1":"flags/1x1/kz.svg","flag_4x3":"flags/4x3/kz.svg","iso":true,"name":"Kazakhstan"},{"capital":"Nairobi","code":"ke","continent":"Africa","flag_1x1":"flags/1x1/ke.svg","flag_4x3":"flags/4x3/ke.svg","iso":true,"name":"Kenya"},{"capital":"South Tarawa","code":"ki","continent":"Oceania","flag_1x1":"flags/1x1/ki.svg","flag_4x3":"flags/4x3/ki.svg","iso":true,"name":"Kiribati"},{"capital":"Pristina","code":"xk","continent":"Europe","flag_1x1":"flags/1x1/xk.svg","flag_4x3":"flags/4x3/xk.svg","iso":false,"name":"Kosovo"},{"capital":"Kuwait City","code":"kw","continent":"Asia","flag_1x1":"flags/1x1/kw.svg","flag_4x3":"flags/4x3/kw.svg","iso":true,"name":"Kuwait"},{"capital":"Bishkek","code":"kg","continent":"Asia","flag_1x1":"flags/1x1/kg.svg","flag_4x3":"flags/4x3/kg.svg","iso":true,"name":"Kyrgyzstan"},{"capital":"Vientiane","code":"la","continent":"Asia","flag_1x1":"flags/1x1/la.svg","flag_4x3":"flags/4x3/la.svg","iso":true,"name":"Laos"},{"capital":"Riga","code":"lv","continent":"Europe","flag_1x1":"flags/1x1/lv.svg","flag_4x3":"flags/4x3/lv.svg","iso":true,"name":"Latvia"},{"code":"arab","flag_1x1":"flags/1x1/arab.svg","flag_4x3":"flags/4x3/arab.svg","iso":false,"name":"League of Arab States"},{"capital":"Beirut","code":"lb","continent":"Asia","flag_1x1":"flags/1x1/lb.svg","flag_4x3":"flags/4x3/lb.svg","iso":true,"name":"Lebanon"},{"capital":"Maseru","code":"ls","continent":"Africa","flag_1x1":"flags/1x1/ls.svg","flag_4x3":"flags/4x3/ls.svg","iso":true,"name":"Lesotho"},{"capital":"Monrovia","code":"lr","continent":"Africa","flag_1x1":"flags/1x1/lr.svg","flag_4x3":"flags/4x3/lr.svg","iso":true,"name":"Liberia"},{"capital":"Tripoli","code":"ly","continent":"Africa","flag_1x1":"flags/1x1/ly.svg","flag_4x3":"flags/4x3/ly.svg","iso":true,"name":"Libya"},{"capital":"Vaduz","code":"li","continent":"Europe","flag_1x1":"flags/1x1/li.svg","flag_4x3":"flags/4x3/li.svg","iso":true,"name":"Liechtenstein"},{"capital":"Vilnius","code":"lt","continent":"Europe","flag_1x1":"flags/1x1/lt.svg","flag_4x3":"flags/4x3/lt.svg","iso":true,"name":"Lithuania"},{"capital":"Luxembourg City","code":"lu","continent":"Europe","flag_1x1":"flags/1x1/lu.svg","flag_4x3":"flags/4x3/lu.svg","iso":true,"name":"Luxembourg"},{"capital":"Macau","code":"mo","continent":"Asia","flag_1x1":"flags/1x1/mo.svg","flag_4x3":"flags/4x3/mo.svg","iso":true,"name":"Macau"},{"capital":"Antananarivo","code":"mg","continent":"Africa","flag_1x1":"flags/1x1/mg.svg","flag_4x3":"flags/4x3/mg.svg","iso":true,"name":"Madagascar"},{"capital":"Lilongwe","code":"mw","continent":"Africa","flag_1x1":"flags/1x1/mw.svg","flag_4x3":"flags/4x3/mw.svg","iso":true,"name":"Malawi"},{"capital":"Kuala Lumpur","code":"my","continent":"Asia","flag_1x1":"flags/1x1/my.svg","flag_4x3":"flags/4x3/my.svg","iso":true,"name":"Malaysia"},{"capital":"Malé","code":"mv","continent":"Asia","flag_1x1":"flags/1x1/mv.svg","flag_4x3":"flags/4x3/mv.svg","iso":true,"name":"Maldives"},{"capital":"Bamako","code":"ml","continent":"Africa","flag_1x1":"flags/1x1/ml.svg","flag_4x3":"flags/4x3/ml.svg","iso":true,"name":"Mali"},{"capital":"Valletta","code":"mt","continent":"Europe","flag_1x1":"flags/1x1/mt.svg","flag_4x3":"flags/4x3/mt.svg","iso":true,"name":"Malta"},{"capital":"Majuro","code":"mh","continent":"Oceania","flag_1x1":"flags/1x1/mh.svg","flag_4x3":"flags/4x3/mh.svg","iso":true,"name":"Marshall Islands"},{"capital":"Fort-de-France","code":"mq","continent":"North America","flag_1x1":"flags/1x1/mq.svg","flag_4x3":"flags/4x3/mq.svg","iso":true,"name":"Martinique"},{"capital":"Nouakchott","code":"mr","continent":"Africa","flag_1x1":"flags/1x1/mr.svg","flag_4x3":"flags/4x3/mr.svg","iso":true,"name":"Mauritania"},{"capital":"Port Louis","code":"mu","continent":"Africa","flag_1x1":"flags/1x1/mu.svg","flag_4x3":"flags/4x3/mu.svg","iso":true,"name":"Mauritius"},{"capital":"Mamoudzou","code":"yt","continent":"Africa","flag_1x1":"flags/1x1/yt.svg","flag_4x3":"flags/4x3/yt.svg","iso":true,"name":"Mayotte"},{"capital":"Mexico City","code":"mx","continent":"North America","flag_1x1":"flags/1x1/mx.svg","flag_4x3":"flags/4x3/mx.svg","iso":true,"name":"Mexico"},{"capital":"Chișinău","code":"md","continent":"Europe","flag_1x1":"flags/1x1/md.svg","flag_4x3":"flags/4x3/md.svg","iso":true,"name":"Moldova"},{"capital":"Monaco","code":"mc","continent":"Europe","flag_1x1":"flags/1x1/mc.svg","flag_4x3":"flags/4x3/mc.svg","iso":true,"name":"Monaco"},{"capital":"Ulaanbaatar","code":"mn","continent":"Asia","flag_1x1":"flags/1x1/mn.svg","flag_4x3":"flags/4x3/mn.svg","iso":true,"name":"Mongolia"},{"capital":"Podgorica","code":"me","continent":"Europe","flag_1x1":"flags/1x1/me.svg","flag_4x3":"flags/4x3/me.svg","iso":true,"name":"Montenegro"},{"capital":"Little Bay, Brades, Plymouth","code":"ms","continent":"North America","flag_1x1":"flags/1x1/ms.svg","flag_4x3":"flags/4x3/ms.svg","iso":true,"name":"Montserrat"},{"capital":"Rabat","code":"ma","continent":"Africa","flag_1x1":"flags/1x1/ma.svg","flag_4x3":"flags/4x3/ma.svg","iso":true,"name":"Morocco"},{"capital":"Maputo","code":"mz","continent":"Africa","flag_1x1":"flags/1x1/mz.svg","flag_4x3":"flags/4x3/mz.svg","iso":true,"name":"Mozambique"},{"capital":"Naypyidaw","code":"mm","continent":"Asia","flag_1x1":"flags/1x1/mm.svg","flag_4x3":"flags/4x3/mm.svg","iso":true,"name":"Myanmar"},{"capital":"Windhoek","code":"na","continent":"Africa","flag_1x1":"flags/1x1/na.svg","flag_4x3":"flags/4x3/na.svg","iso":true,"name":"Namibia"},{"capital":"Yaren District","code":"nr","continent":"Oceania","flag_1x1":"flags/1x1/nr.svg","flag_4x3":"flags/4x3/nr.svg","iso":true,"name":"Nauru"},{"capital":"Kathmandu","code":"np","continent":"Asia","flag_1x1":"flags/1x1/np.svg","flag_4x3":"flags/4x3/np.svg","iso":true,"name":"Nepal"},{"capital":"Amsterdam","code":"nl","continent":"Europe","flag_1x1":"flags/1x1/nl.svg","flag_4x3":"flags/4x3/nl.svg","iso":true,"name":"Netherlands"},{"capital":"Nouméa","code":"nc","continent":"Oceania","flag_1x1":"flags/1x1/nc.svg","flag_4x3":"flags/4x3/nc.svg","iso":true,"name":"New Caledonia"},{"capital":"Wellington","code":"nz","continent":"Oceania","flag_1x1":"flags/1x1/nz.svg","flag_4x3":"flags/4x3/nz.svg","iso":true,"name":"New Zealand"},{"capital":"Managua","code":"ni","continent":"North America","flag_1x1":"flags/1x1/ni.svg","flag_4x3":"flags/4x3/ni.svg","iso":true,"name":"Nicaragua"},{"capital":"Niamey","code":"ne","continent":"Africa","flag_1x1":"flags/1x1/ne.svg","flag_4x3":"flags/4x3/ne.svg","iso":true,"name":"Niger"},{"capital":"Abuja","code":"ng","continent":"Africa","flag_1x1":"flags/1x1/ng.svg","flag_4x3":"flags/4x3/ng.svg","iso":true,"name":"Nigeria"},{"capital":"Alofi","code":"nu","continent":"Oceania","flag_1x1":"flags/1x1/nu.svg","flag_4x3":"flags/4x3/nu.svg","iso":true,"name":"Niue"},{"capital":"Kingston","code":"nf","continent":"Oceania","flag_1x1":"flags/1x1/nf.svg","flag_4x3":"flags/4x3/nf.svg","iso":true,"name":"Norfolk Island"},{"capital":"Pyongyang","code":"kp","continent":"Asia","flag_1x1":"flags/1x1/kp.svg","flag_4x3":"flags/4x3/kp.svg","iso":true,"name":"North Korea"},{"capital":"Skopje","code":"mk","continent":"Europe","flag_1x1":"flags/1x1/mk.svg","flag_4x3":"flags/4x3/mk.svg","iso":true,"name":"North Macedonia"},{"capital":"Belfast","code":"gb-nir","continent":"Europe","flag_1x1":"flags/1x1/gb-nir.svg","flag_4x3":"flags/4x3/gb-nir.svg","iso":false,"name":"Northern Ireland"},{"capital":"Saipan","code":"mp","continent":"Oceania","flag_1x1":"flags/1x1/mp.svg","flag_4x3":"flags/4x3/mp.svg","iso":true,"name":"Northern Mariana Islands"},{"capital":"Oslo","code":"no","continent":"Europe","flag_1x1":"flags/1x1/no.svg","flag_4x3":"flags/4x3/no.svg","iso":true,"name":"Norway"},{"capital":"Muscat","code":"om","continent":"Asia","flag_1x1":"flags/1x1/om.svg","flag_4x3":"flags/4x3/om.svg","iso":true,"name":"Oman"},{"code":"pc","flag_1x1":"flags/1x1/pc.svg","flag_4x3":"flags/4x3/pc.svg","iso":false,"name":"Pacific Community"},{"capital":"Islamabad","code":"pk","continent":"Asia","flag_1x1":"flags/1x1/pk.svg","flag_4x3":"flags/4x3/pk.svg","iso":true,"name":"Pakistan"},{"capital":"Ngerulmud","code":"pw","continent":"Oceania","flag_1x1":"flags/1x1/pw.svg","flag_4x3":"flags/4x3/pw.svg","iso":true,"name":"Palau"},{"capital":"Panama City","code":"pa","continent":"North America","flag_1x1":"flags/1x1/pa.svg","flag_4x3":"flags/4x3/pa.svg","iso":true,"name":"Panama"},{"capital":"Port Moresby","code":"pg","continent":"Oceania","flag_1x1":"flags/1x1/pg.svg","flag_4x3":"flags/4x3/pg.svg","iso":true,"name":"Papua New Guinea"},{"capital":"Asunción","code":"py","continent":"South America","flag_1x1":"flags/1x1/py.svg","flag_4x3":"flags/4x3/py.svg","iso":true,"name":"Paraguay"},{"capital":"Lima","code":"pe","continent":"South America","flag_1x1":"flags/1x1/pe.svg","flag_4x3":"flags/4x3/pe.svg","iso":true,"name":"Peru"},{"capital":"Manila","code":"ph","continent":"Asia","flag_1x1":"flags/1x1/ph.svg","flag_4x3":"flags/4x3/ph.svg","iso":true,"name":"Philippines"},{"capital":"Adamstown","code":"pn","continent":"Oceania","flag_1x1":"flags/1x1/pn.svg","flag_4x3":"flags/4x3/pn.svg","iso":true,"name":"Pitcairn"},{"capital":"Warsaw","code":"pl","continent":"Europe","flag_1x1":"flags/1x1/pl.svg","flag_4x3":"flags/4x3/pl.svg","iso":true,"name":"Poland"},{"capital":"Lisbon","code":"pt","continent":"Europe","flag_1x1":"flags/1x1/pt.svg","flag_4x3":"flags/4x3/pt.svg","iso":true,"name":"Portugal"},{"capital":"San Juan","code":"pr","continent":"North America","flag_1x1":"flags/1x1/pr.svg","flag_4x3":"flags/4x3/pr.svg","iso":true,"name":"Puerto Rico"},{"capital":"Doha","code":"qa","continent":"Asia","flag_1x1":"flags/1x1/qa.svg","flag_4x3":"flags/4x3/qa.svg","iso":true,"name":"Qatar"},{"capital":"Brazzaville","code":"cg","continent":"Africa","flag_1x1":"flags/1x1/cg.svg","flag_4x3":"flags/4x3/cg.svg","iso":true,"name":"Republic of the Congo"},{"capital":"Bucharest","code":"ro","continent":"Europe","flag_1x1":"flags/1x1/ro.svg","flag_4x3":"flags/4x3/ro.svg","iso":true,"name":"Romania"},{"capital":"Moscow","code":"ru","continent":"Europe","flag_1x1":"flags/1x1/ru.svg","flag_4x3":"flags/4x3/ru.svg","iso":true,"name":"Russia"},{"capital":"Kigali","code":"rw","continent":"Africa","flag_1x1":"flags/1x1/rw.svg","flag_4x3":"flags/4x3/rw.svg","iso":true,"name":"Rwanda"},{"capital":"Saint-Denis","code":"re","continent":"Africa","flag_1x1":"flags/1x1/re.svg","flag_4x3":"flags/4x3/re.svg","iso":true,"name":"Réunion"},{"capital":"Gustavia","code":"bl","continent":"North America","flag_1x1":"flags/1x1/bl.svg","flag_4x3":"flags/4x3/bl.svg","iso":true,"name":"Saint Barthélemy"},{"capital":"Jamestown","code":"sh-hl","continent":"Africa","flag_1x1":"flags/1x1/sh-hl.svg","flag_4x3":"flags/4x3/sh-hl.svg","iso":false,"name":"Saint Helena"},{"capital":"Jamestown","code":"sh","continent":"Africa","flag_1x1":"flags/1x1/sh.svg","flag_4x3":"flags/4x3/sh.svg","iso":true,"name":"Saint Helena, Ascension and Tristan da Cunha"},{"capital":"Basseterre","code":"kn","continent":"North America","flag_1x1":"flags/1x1/kn.svg","flag_4x3":"flags/4x3/kn.svg","iso":true,"name":"Saint Kitts and Nevis"},{"capital":"Castries","code":"lc","continent":"North America","flag_1x1":"flags/1x1/lc.svg","flag_4x3":"flags/4x3/lc.svg","iso":true,"name":"Saint Lucia"},{"capital":"Marigot","code":"mf","continent":"North America","flag_1x1":"flags/1x1/mf.svg","flag_4x3":"flags/4x3/mf.svg","iso":true,"name":"Saint Martin"},{"capital":"Saint-Pierre","code":"pm","continent":"North America","flag_1x1":"flags/1x1/pm.svg","flag_4x3":"flags/4x3/pm.svg","iso":true,"name":"Saint Pierre and Miquelon"},{"capital":"Kingstown","code":"vc","continent":"North America","flag_1x1":"flags/1x1/vc.svg","flag_4x3":"flags/4x3/vc.svg","iso":true,"name":"Saint Vincent and the Grenadines"},{"capital":"Apia","code":"ws","continent":"Oceania","flag_1x1":"flags/1x1/ws.svg","flag_4x3":"flags/4x3/ws.svg","iso":true,"name":"Samoa"},{"capital":"San Marino","code":"sm","continent":"Europe","flag_1x1":"flags/1x1/sm.svg","flag_4x3":"flags/4x3/sm.svg","iso":true,"name":"San Marino"},{"capital":"São Tomé","code":"st","continent":"Africa","flag_1x1":"flags/1x1/st.svg","flag_4x3":"flags/4x3/st.svg","iso":true,"name":"Sao Tome and Principe"},{"capital":"Riyadh","code":"sa","continent":"Asia","flag_1x1":"flags/1x1/sa.svg","flag_4x3":"flags/4x3/sa.svg","iso":true,"name":"Saudi Arabia"},{"capital":"Edinburgh","code":"gb-sct","continent":"Europe","flag_1x1":"flags/1x1/gb-sct.svg","flag_4x3":"flags/4x3/gb-sct.svg","iso":false,"name":"Scotland"},{"capital":"Dakar","code":"sn","continent":"Africa","flag_1x1":"flags/1x1/sn.svg","flag_4x3":"flags/4x3/sn.svg","iso":true,"name":"Senegal"},{"capital":"Belgrade","code":"rs","continent":"Europe","flag_1x1":"flags/1x1/rs.svg","flag_4x3":"flags/4x3/rs.svg","iso":true,"name":"Serbia"},{"capital":"Victoria","code":"sc","continent":"Africa","flag_1x1":"flags/1x1/sc.svg","flag_4x3":"flags/4x3/sc.svg","iso":true,"name":"Seychelles"},{"capital":"Freetown","code":"sl","continent":"Africa","flag_1x1":"flags/1x1/sl.svg","flag_4x3":"flags/4x3/sl.svg","iso":true,"name":"Sierra Leone"},{"capital":"Singapore","code":"sg","continent":"Asia","flag_1x1":"flags/1x1/sg.svg","flag_4x3":"flags/4x3/sg.svg","iso":true,"name":"Singapore"},{"capital":"Philipsburg","code":"sx","continent":"North America","flag_1x1":"flags/1x1/sx.svg","flag_4x3":"flags/4x3/sx.svg","iso":true,"name":"Sint Maarten"},{"capital":"Bratislava","code":"sk","continent":"Europe","flag_1x1":"flags/1x1/sk.svg","flag_4x3":"flags/4x3/sk.svg","iso":true,"name":"Slovakia"},{"capital":"Ljubljana","code":"si","continent":"Europe","flag_1x1":"flags/1x1/si.svg","flag_4x3":"flags/4x3/si.svg","iso":true,"name":"Slovenia"},{"capital":"Honiara","code":"sb","continent":"Oceania","flag_1x1":"flags/1x1/sb.svg","flag_4x3":"flags/4x3/sb.svg","iso":true,"name":"Solomon Islands"},{"capital":"Mogadishu","code":"so","continent":"Africa","flag_1x1":"flags/1x1/so.svg","flag_4x3":"flags/4x3/so.svg","iso":true,"name":"Somalia"},{"capital":"Pretoria","code":"za","continent":"Africa","flag_1x1":"flags/1x1/za.svg","flag_4x3":"flags/4x3/za.svg","iso":true,"name":"South Africa"},{"capital":"King Edward Point","code":"gs","continent":"Antarctica","flag_1x1":"flags/1x1/gs.svg","flag_4x3":"flags/4x3/gs.svg","iso":true,"name":"South Georgia and the South Sandwich Islands"},{"capital":"Seoul","code":"kr","continent":"Asia","flag_1x1":"flags/1x1/kr.svg","flag_4x3":"flags/4x3/kr.svg","iso":true,"name":"South Korea"},{"capital":"Juba","code":"ss","continent":"Africa","flag_1x1":"flags/1x1/ss.svg","flag_4x3":"flags/4x3/ss.svg","iso":true,"name":"South Sudan"},{"capital":"Madrid","code":"es","continent":"Europe","flag_1x1":"flags/1x1/es.svg","flag_4x3":"flags/4x3/es.svg","iso":true,"name":"Spain"},{"capital":"Sri Jayawardenepura Kotte, Colombo","code":"lk","continent":"Asia","flag_1x1":"flags/1x1/lk.svg","flag_4x3":"flags/4x3/lk.svg","iso":true,"name":"Sri Lanka"},{"capital":"Ramallah","code":"ps","continent":"Asia","flag_1x1":"flags/1x1/ps.svg","flag_4x3":"flags/4x3/ps.svg","iso":true,"name":"State of Palestine"},{"capital":"Khartoum","code":"sd","continent":"Africa","flag_1x1":"flags/1x1/sd.svg","flag_4x3":"flags/4x3/sd.svg","iso":true,"name":"Sudan"},{"capital":"Paramaribo","code":"sr","continent":"South America","flag_1x1":"flags/1x1/sr.svg","flag_4x3":"flags/4x3/sr.svg","iso":true,"name":"Suriname"},{"capital":"Longyearbyen","code":"sj","continent":"Europe","flag_1x1":"flags/1x1/sj.svg","flag_4x3":"flags/4x3/sj.svg","iso":true,"name":"Svalbard and Jan Mayen"},{"capital":"Stockholm","code":"se","continent":"Europe","flag_1x1":"flags/1x1/se.svg","flag_4x3":"flags/4x3/se.svg","iso":true,"name":"Sweden"},{"capital":"Bern","code":"ch","continent":"Europe","flag_1x1":"flags/1x1/ch.svg","flag_4x3":"flags/4x3/ch.svg","iso":true,"name":"Switzerland"},{"capital":"Damascus","code":"sy","continent":"Asia","flag_1x1":"flags/1x1/sy.svg","flag_4x3":"flags/4x3/sy.svg","iso":true,"name":"Syria"},{"capital":"Taipei","code":"tw","continent":"Asia","flag_1x1":"flags/1x1/tw.svg","flag_4x3":"flags/4x3/tw.svg","iso":true,"name":"Taiwan"},{"capital":"Dushanbe","code":"tj","continent":"Asia","flag_1x1":"flags/1x1/tj.svg","flag_4x3":"flags/4x3/tj.svg","iso":true,"name":"Tajikistan"},{"capital":"Dodoma","code":"tz","continent":"Africa","flag_1x1":"flags/1x1/tz.svg","flag_4x3":"flags/4x3/tz.svg","iso":true,"name":"Tanzania"},{"capital":"Bangkok","code":"th","continent":"Asia","flag_1x1":"flags/1x1/th.svg","flag_4x3":"flags/4x3/th.svg","iso":true,"name":"Thailand"},{"capital":"Dili","code":"tl","continent":"Asia","flag_1x1":"flags/1x1/tl.svg","flag_4x3":"flags/4x3/tl.svg","iso":true,"name":"Timor-Leste"},{"capital":"Lomé","code":"tg","continent":"Africa","flag_1x1":"flags/1x1/tg.svg","flag_4x3":"flags/4x3/tg.svg","iso":true,"name":"Togo"},{"capital":"Nukunonu, Atafu,Tokelau","code":"tk","continent":"Oceania","flag_1x1":"flags/1x1/tk.svg","flag_4x3":"flags/4x3/tk.svg","iso":true,"name":"Tokelau"},{"capital":"Nukuʻalofa","code":"to","continent":"Oceania","flag_1x1":"flags/1x1/to.svg","flag_4x3":"flags/4x3/to.svg","iso":true,"name":"Tonga"},{"capital":"Port of Spain","code":"tt","continent":"South America","flag_1x1":"flags/1x1/tt.svg","flag_4x3":"flags/4x3/tt.svg","iso":true,"name":"Trinidad and Tobago"},{"capital":"Edinburgh of the Seven Seas","code":"sh-ta","continent":"Africa","flag_1x1":"flags/1x1/sh-ta.svg","flag_4x3":"flags/4x3/sh-ta.svg","iso":false,"name":"Tristan da Cunha"},{"capital":"Tunis","code":"tn","continent":"Africa","flag_1x1":"flags/1x1/tn.svg","flag_4x3":"flags/4x3/tn.svg","iso":true,"name":"Tunisia"},{"capital":"Ashgabat","code":"tm","continent":"Asia","flag_1x1":"flags/1x1/tm.svg","flag_4x3":"flags/4x3/tm.svg","iso":true,"name":"Turkmenistan"},{"capital":"Cockburn Town","code":"tc","continent":"North America","flag_1x1":"flags/1x1/tc.svg","flag_4x3":"flags/4x3/tc.svg","iso":true,"name":"Turks and Caicos Islands"},{"capital":"Funafuti","code":"tv","continent":"Oceania","flag_1x1":"flags/1x1/tv.svg","flag_4x3":"flags/4x3/tv.svg","iso":true,"name":"Tuvalu"},{"capital":"Ankara","code":"tr","continent":"Asia","flag_1x1":"flags/1x1/tr.svg","flag_4x3":"flags/4x3/tr.svg","iso":true,"name":"Türkiye"},{"capital":"Kampala","code":"ug","continent":"Africa","flag_1x1":"flags/1x1/ug.svg","flag_4x3":"flags/4x3/ug.svg","iso":true,"name":"Uganda"},{"capital":"Kiev","code":"ua","continent":"Europe","flag_1x1":"flags/1x1/ua.svg","flag_4x3":"flags/4x3/ua.svg","iso":true,"name":"Ukraine"},{"capital":"Abu Dhabi","code":"ae","continent":"Asia","flag_1x1":"flags/1x1/ae.svg","flag_4x3":"flags/4x3/ae.svg","iso":true,"name":"United Arab Emirates"},{"capital":"London","code":"gb","continent":"Europe","flag_1x1":"flags/1x1/gb.svg","flag_4x3":"flags/4x3/gb.svg","iso":true,"name":"United Kingdom"},{"code":"un","flag_1x1":"flags/1x1/un.svg","flag_4x3":"flags/4x3/un.svg","iso":false,"name":"United Nations"},{"capital":"Washington, D.C.","code":"um","continent":"North America","flag_1x1":"flags/1x1/um.svg","flag_4x3":"flags/4x3/um.svg","iso":true,"name":"United States Minor Outlying Islands"},{"capital":"Washington, D.C.","code":"us","continent":"North America","flag_1x1":"flags/1x1/us.svg","flag_4x3":"flags/4x3/us.svg","iso":true,"name":"United States of America"},{"code":"xx","flag_1x1":"flags/1x1/xx.svg","flag_4x3":"flags/4x3/xx.svg","iso":false,"name":"Unknown"},{"capital":"Montevideo","code":"uy","continent":"South America","flag_1x1":"flags/1x1/uy.svg","flag_4x3":"flags/4x3/uy.svg","iso":true,"name":"Uruguay"},{"capital":"Tashkent","code":"uz","continent":"Asia","flag_1x1":"flags/1x1/uz.svg","flag_4x3":"flags/4x3/uz.svg","iso":true,"name":"Uzbekistan"},{"capital":"Port Vila","code":"vu","continent":"Oceania","flag_1x1":"flags/1x1/vu.svg","flag_4x3":"flags/4x3/vu.svg","iso":true,"name":"Vanuatu"},{"capital":"Caracas","code":"ve","continent":"South America","flag_1x1":"flags/1x1/ve.svg","flag_4x3":"flags/4x3/ve.svg","iso":true,"name":"Venezuela"},{"capital":"Hanoi","code":"vn","continent":"Asia","flag_1x1":"flags/1x1/vn.svg","flag_4x3":"flags/4x3/vn.svg","iso":true,"name":"Vietnam"},{"capital":"Road Town","code":"vg","continent":"North America","flag_1x1":"flags/1x1/vg.svg","flag_4x3":"flags/4x3/vg.svg","iso":true,"name":"Virgin Islands (British)"},{"capital":"Charlotte Amalie","code":"vi","continent":"North America","flag_1x1":"flags/1x1/vi.svg","flag_4x3":"flags/4x3/vi.svg","iso":true,"name":"Virgin Islands (U.S.)"},{"capital":"Cardiff","code":"gb-wls","continent":"Europe","flag_1x1":"flags/1x1/gb-wls.svg","flag_4x3":"flags/4x3/gb-wls.svg","iso":false,"name":"Wales"},{"capital":"Mata-Utu","code":"wf","continent":"Oceania","flag_1x1":"flags/1x1/wf.svg","flag_4x3":"flags/4x3/wf.svg","iso":true,"name":"Wallis and Futuna"},{"capital":"Laayoune","code":"eh","continent":"Africa","flag_1x1":"flags/1x1/eh.svg","flag_4x3":"flags/4x3/eh.svg","iso":true,"name":"Western Sahara"},{"capital":"Sana'a","code":"ye","continent":"Asia","flag_1x1":"flags/1x1/ye.svg","flag_4x3":"flags/4x3/ye.svg","iso":true,"name":"Yemen"},{"capital":"Lusaka","code":"zm","continent":"Africa","flag_1x1":"flags/1x1/zm.svg","flag_4x3":"flags/4x3/zm.svg","iso":true,"name":"Zambia"},{"capital":"Harare","code":"zw","continent":"Africa","flag_1x1":"flags/1x1/zw.svg","flag_4x3":"flags/4x3/zw.svg","iso":true,"name":"Zimbabwe"}],"temp":{"table1":{"Carrier":"<div class=\"col-img\"><div class=\"image\"> <img src=\"{{cimg}}\" alt=\"\"> </div><p class=\"text-sm\">{{Carrier}}</p></div>","Country":"<span class=\"text-muted\"><i class=\"fi fi-{{{code}}}\"></i> {{{Country}}}</span>","Shipment Date":"<span class=\"font-monospace\">{{Date}}</span>","Tracking Number":"<span class=\"text-decoration-none\">{{Tracking Number}}</span>","Order Name":"<a href=\"{{{link}}}\">{{Order Name}}</a>","Zone":"<span class=\"badge bg-label-primary fs-md rounded-pill ms-auto fw-semibold\" style=\"background-color: {{{color}}}; text-color: {{{text}}};\">{{Zone}}</span>","Group":"<span class=\"badge bg-label-primary fs-md rounded-pill ms-auto fw-semibold\" style=\"background-color: {{{color}}}; text-color: {{{text}}};\">{{Group}}</span>","Data":"<div class=\"text-wrap\"><p class=\"mb-0\">Orders: <small class=\"stats-figure\">{{Orders}}</small></p><p class=\"mb-0\">Cost: <small class=\"stats-figure\">{{Cost}}</small></p></div>"},"toolbar":{"toolbar1":"<div class=\"btn-group\" role=\"group\">{{#options}}{{#isbutton}}<input type=\"checkbox\" class=\"btn-check\" id=\"{{name}}-{{table}}\" name=\"{{name}}\" data-table=\"{{table}}\" autocomplete=\"off\"><label class=\"btn text-primary\" for=\"{{name}}-{{table}}\"><i class=\"{{icon}}\"></i></label>{{/isbutton}}{{#isgroup}}<div class=\"btn-group dropdown\" role=\"group\"><button class=\"btn text-primary dropdown-toggle\" data-bs-toggle=\"dropdown\" aria-expanded=\"false\" data-bs-auto-close=\"outside\"><i class=\"{{icon}}\"></i></button><div class=\"dropdown-menu px-4 py-3\"><p class=\"fw-semibold\">{{name}}</p>{{#values}}<label class=\"form-check-label ms-3 text-nowrap\"><input class=\"form-check-input\" type=\"{{#multiple}}checkbox{{/multiple}}{{^multiple}}radio{{/multiple}}\" value=\"{{value}}\" name=\"{{name}}\" data-table=\"{{table}}\"  {{#selected}}checked{{/selected}}> {{label}}</label>{{/values}}</div></div>{{/isgroup}}{{/options}}</div>","ftoolbar":"<form class=\"row g-3 mb-4 align-items-center justify-content-between\" data-table=\"{{table}}\">    {{#options}}    {{#isDate}}    <div class=\"col-md-3 col-12\">    <label for=\"{{name}}\" class=\"form-text\">{{label}} (<span class=\"fw-bold text-primary date-text\">{{text}}</span>)</label>    <input type=\"text\" name=\"{{name}}\" id=\"{{name}}\" class=\"form-control date\" value=\"{{value}}\">    </div>    {{/isDate}}    {{#isSelect}}    <div class=\"col-md-3 dropdown\">        <label for=\"{{name}}\" class=\"form-text\">{{label}}</label>          <button type=\"button\" id=\"{{name}}\" class=\"form-control dropdown-toggle\" data-bs-toggle=\"dropdown\" data-bs-auto-close=\"outside\" aria-expanded=\"false\">                <span class=\"len\">{{len}}</span> chosen          </button>         <div class=\"dropdown-menu px-4 py-3\">     \t\t\t\t\t                     <input type=\"text\"  data-target=\"{{name}}\" data-table=\"{{table}}\" id=\"{{name}}-search\" name=\"search\" class=\"form-control form-control-sm search\" placeholder=\"Search\">  <div class=\"form-check pt-2\">    \t<label class=\"form-check-label ms-3\" for=\"{{name}}-all\"><input class=\"form-check-input all\" type=\"checkbox\" data-target=\"{{name}}\" data-table=\"{{table}}\" id=\"{{name}}-all\" {{#all}}checked{{/all}}> Toggle All</label>    \t </div>    \t<div class=\"dropdown-divider\"></div> <div class=\"overflow-scroll\" style=\"max-height: 200px;\">        \t{{#values}}          <div class=\"form-check\">    \t<input class=\"form-check-input\" type=\"checkbox\" id=\"{{value}}\" name=\"{{name}}\" data-table=\"{{table}}\" value=\"{{value}}\" {{#selected}}checked{{/selected}}><label class=\"form-check-label  ms-3\" for=\"{{value}}\"> {{label}}</label>  </div>    \t{{/values}}    </div>  </div>     </div>    {{/isSelect}}    {{/options}}    <div class=\"col-md-3 col-12 d-grid gap-2 d-md-block align-self-end\">    <div class=\"btn-group btn-group-sm\" role=\"group\">    <button type=\"submit\" class=\"btn btn-success\"><i class=\"fa-solid fa-check\"></i> Apply</button>    <button type=\"reset\" class=\"btn btn-info\"><i class=\"fa-solid fa-ban\"></i> Clear</button>      </div>       </div>    </form>"}}};
 var data = Data.data; var temp = Data.temp;
 var brands ={"UPS":"https://asset.brandfetch.io/id5aN1Q7um/idUh0ZGT1Q.png","USPS":"https://asset.brandfetch.io/id-p7ctquk/idEPatNFfS.png","DHLECS":"https://asset.brandfetch.io/idv0ZbfQqf/idEkpwpXXj.png","FedEx":"https://asset.brandfetch.io/idVIIZH-LB/idUA3eghej.png"};
 var theme = $("html").attr("data-bs-theme");
@@ -21304,7 +21260,7 @@ case "currency":
 value = parseInt(value);
 value = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD'}).format(value);
 break;
-case "percentage":
+case "percent":
 value = parseInt(value);
 value = value + "%";
 }
@@ -21320,42 +21276,26 @@ return {cimg: brands[value]};
 return {code: Data.countries.find(c => c.name.includes(value)).code};
 }},
 {field: "Zone", format: function(value) {
-return {"Zone": 'Zone '+value, color: fcolors[value], 
-text: lightOrDark(fcolors[value])==`light` ? 'dark' : 'white'}
-}},
-{field: "Group", format: function(value) {
-var cl = _.shuffle(fcolors)[0];
-return {"Group": value, color: cl, 
-text: lightOrDark(cl)==`light` ? 'dark' : 'white'}
-}},
-{field: "Shipment Date", format: function(value) {
-return {"Date": moment(value).format("MM/DD/YYYY")}
+return {"Zone": 'Zone '+value};
 }},
 {field: "Order Name", format: function(value) {
 return {link: "https://crm.gearment.com/acp/?site=order&act=show&id="+value.replace("TW-00","")}}
 }];
 
 var columns = [{"title":"Provider","field":"Provider", visible: false, id: 2},{"title":"Carrier","field":"Carrier", "id": 3, type: "isSelect"},{"title":"Service","field":"Service", "id": 4},{"title":"Country","field":"Country", "id": 10, type: "isSelect", "format": true},{"title":"Zone","field":"Zone", "id": 9,  "format": true},{"title":"Billed Weight","field":"Billed Weight", "id": 7},{"title":"Actual Weight","field":"Actual Weight", "id": 8},{"title":"Shipping Cost","field":"Shipping Cost", "id": 5, "format": true, ftype: "currency"},{"title":"Shipment Date","field":"Shipment Date", "id": 11, "format": true, type: "isDate", ftype: "date"},{"title":"Tracking Number","field":"Tracking Number", "id": 1},{"title":"Order Name","field":"Order Name", "id": 0, "format": true}];
-columns = columns.map(col => col=_.extend(col, {formatter: (col.format==true)? function(value) {
-return (this.ftype!=undefined) ?  format(value, this.ftype) : value; } : undefined,
+columns = columns.map(col => col=_.extend(col, {formatter: (col.format==true) ? function(value,row,i) {
+value = (value!=undefined&&value!=null) ? format(value, this.ftype) : value;
+return value; } : undefined,
 cellStyle: function(value, row, index) {
-return {classes: "cell", css: {"max-width": '30px', "white-space": "normal", "word-wrap": "break-word"}}}
+return {css: {"max-width": '30px', "white-space": "normal", "word-wrap": "break-word"}}}
 }));
 var tb1opts = {get data() {
-var source = this.source;
-var tdata = source.reduce((acc, it) => (f = fdata.reduce((ob, d) => (v = it[d.field], ob = (v!=undefined&&v!=null) ? d.format(it[d.field]) : ob, ob), {}), it = _.extend(it, f), acc.push(it), acc), []);
-return tdata;
-}, columns: columns, height: 500, oheight: 500, toolbar: "#toolbar1", search: true, searchable: true, groupBy: false, virtualScroll: true, 
-classes: "table table-sm table-hover mb-0", headerStyle: function(column) {return {css: {"width": '30px', "white-space": "normal", "word-wrap": "break-word"}} }
+var source = this.source; 
+return source;
+}, columns: columns, height: 500, oheight: 500, toolbar: "#toolbar1", search: true, searchable: true, groupBy: false, virtualScroll: true, stickyHeader: true, stickyHeaderOffsetLeft: parseInt($('body').css('padding-left'), 10),
+classes: "table table-sm table-hover table-compact", headerStyle: function(column) {return {classes: "text-wrap text-break", css: {"width": '30px'}} }
 };
 
-// colFormat
-function detailFormat(value, row, i) {
-var field = this.field; var tp = temp.table1; 
-value = (this.ftype!=undefined) ?  format(value, this.ftype) : value;
-value = (tp[field]!=undefined) ? Mustache.render(tp[field], _.assign({}, row, {[field]: value})) : value;
-return value;
-}
 
 // ftoolbar
 var dranges = {'Today': [moment(), moment()],
@@ -21375,185 +21315,144 @@ $(".date-text").text($(this).text()); });
 options: data.columns.map((col,i) => col = _.extend(col, {name: col.name+"-filter", get len() {return _.where(this.values,{selected:true}).length}, [_.findWhere(columns,{field: col.name}).type]: true, values: (col.values!=false) && col.values.map(v=>v={value:v, label: v, selected:false}) }) )
 };
 
-// toolbar1
-var tops = { get build() { var id = this.toolbar; 
-var html = Mustache.render(temp.toolbar.toolbar1, this); $(id).html(html);
-},
-toptions: [{"name":"refresh","icon":"fas fa-redo", isbutton: true},{"name":"fullscreen","icon":"fas fa-expand", isbutton: true}, {"name":"expand","icon":"fas fa-angles-down", isbutton: true},
-{"name":"pivot","icon":"fas fa-object-ungroup", isgroup: true, type:"select", itype:"radio", get values() {
-var scols = this.scolumns;
-return scols.map(v => v={label: v, value: v, selected: false}); 
-}},
-{name: "show-column", icon:"fas fa-columns", isgroup: true, type:"select", get scolumns() { return getOptions("visibleColumns",  $("#table1"));
-}, get values() {
-var scols = this.scolumns;
-return columns.map(v => v={label: v.title, value: v.field, selected: scols.includes(v.field)}); }},
-{name: "group-column", icon: "fas fa-th-list", isgroup: true, type:"select", get scolumns() {
-return getOptions("groupColumns",  $("#table1"));
-}, get values() {
-var scols = this.scolumns;
-return columns.map(v => v={label: v.title, value: v.field, selected: scols.includes(v.field)}); },
-get options() {
-var options = (this.coptions!=undefined) ? this.toptions.filter(op => this.coptions.includes(op.name)) : this.toptions;
-return options;
-}}]
-};
-
-var t1tb = _.assign(_.create(tops), {table: "#table1", toolbar: "#toolbar1", coptions: ["refresh","expand","fullscreen","show-column","group-column"]});
-
 // tables
-// pivotBy
-function pivotBy(data, groupby, key, value, keys) {
-	let uniqueKeys = [];
-	let pivotedData = [];
-uniqueKeys = data.reduce((uniqueValues, obj) => {
-if (!uniqueValues.includes(obj[groupby])) {
-
-		uniqueValues.push(obj[groupby]);
-		}
-		return uniqueValues;
-	}, []);
-
-	uniqueKeys.forEach((item) => {
-        pivotedData.push(
-            data.reduce((pivotedObj, obj) => {
-                if(item == obj[groupby]) {
-                          (keys!=null) && keys.forEach(k => pivotedObj[k] = obj[k]);
-                    pivotedObj[groupby] = obj[groupby];
-                    pivotedObj[obj[key]] = (pivotedObj[obj[key]]!=undefined) ? pivotedObj[obj[key]] + obj[value] : obj[value];
-                }                
-                return pivotedObj
-            }, {})
-        )
-    });
-
-	return pivotedData;
-};
-
-// PivotTable
-function PivotTable(data, rows, columns, values, group) {
-var gdata = _.pairs(_.groupBy(data, group)).reduce((acc, [k, arr]) =>(narr = pivotBy(arr, rows, columns, values, group), acc.push(...narr), acc), []);
-var gcolumns =[rows, ..._.keys(_.groupBy(data, columns))];
-return {data: gdata, columns: gcolumns};
-};
-
 // table2, table 3, table 4, table 5
-var toptions = {classes: "table table-md table-borderless mb-0", showHeader: false, vformat: function(arr, field, type, data) {
+var toptions = {classes: "table table-borderless mb-0", showHeader: false, 
+vformat: function(arr, field, type) {
 var res;
 switch (type) {
 case "count":
 res = arr.length;
 break;
 case "sum":
-res = _.pluck(arr, field).reduce((a,b)=> a+parseInt(parseInt(b)), 0);
-break;
-case "percentage":
-res = arr.length / data.length * 100;
+res = arr.map(r => parseInt(r[field])).
+reduce((a,b)=> a+b, 0);
 break;
 }
 return res;
 }, get data() {
 var source = this.handler(this.source);
 var gb = this.filter.rows[0];
-source =  source.sort((a,b)=>a[gb]>b[gb]);
 var data = _.groupBy(source, gb);
-data = _.pairs(data).reduce((acc, [k, arr]) => ( 
-ob = {[this.filter.rows[0]]: k}, this.filter.columns.forEach(col => ob[col.title] = format(this.vformat(arr, col.field, col.value, source), col.ftype)), acc.push(ob), acc), []);
+data = _.pairs(data).reduce((acc, [k, arr], i) => ( 
+ob = {[gb]: k, color: fcolors[i], text: lightOrDark(this.color)==`light` ? 'dark' : 'white'}, this.filter.columns.forEach(col => ob[col.title] = format(this.vformat(arr, col.field, col.value), col.ftype)), acc.push(ob), acc), []);
 return data;
 }, get columns() {
-var group = this.filter.rows[0];
-return ["Group","Data"].map((c,i)=> c = {field: (i==0) ? group : c, title: c, index: i, cellStyle: function(v, r, ci) {
+var gb = this.filter.rows[0];
+return ["Group","Data"].map((c,i)=> c = {field: (i==0) ? gb : c, title: c, index: i, cellStyle: function(v, r, ci) {
 return {classes:`${(i==0)?'text-start':'text-end'} mb-0`, css: {'max-width': '50px'}};
-}, formatter: function(v, r, i) {
+}, formatter: function(v, r, i) { 
     var tp = temp.table1; var fd = _.findWhere(fdata, {field: this.field}) ?? _.findWhere(fdata, {field: this.title});
-    if (fd!=undefined)  r = _.extend(r, fd.format(v));
+    if (fd!=undefined)  nr = _.extend(r, fd.format(v));
     var tm = tp[this.field] ?? tp[this.title];
-    return (tm!=undefined) ? Mustache.render(tm, r) : v;
+    return (tm!=undefined) ? Mustache.render(tm, nr) : v;
 } });
-},
-build: function(data) {
-this.source = data;
-
-return this;
 }};
 
-var tables = {};
-
-var tb2opts = _.assign(_.create(toptions), {table: "#table2", height: 200, filter: {rows: ["Zone"], columns: [{field: "Order Name", title: "Orders", value: "percentage", ftype: "percentage"}, {field: "Shipping Cost", title: "Cost", value: "sum", ftype: "currency"}]}, handler: function(data) {
+var tables = [];
+var tb2opts = _.assign(_.create(toptions), {table: "#table2", height: 200, filter: {rows: ["Zone"], columns: [{field: "Order Name", title: "Orders", value: "count", ftype: "number"}, {field: "Shipping Cost", title: "Cost", value: "sum", ftype: "currency"}]}, handler: function(data) {
 return data.filter(d => d.Zone!=null);
 } });
-tables.table2 = tb2opts;
 
 var tb3opts = _.assign(_.create(toptions), {table: "#table3", height: 200, filter: {rows: ["Country"], columns: [{field: "Order Name", title: "Orders", value: "count", ftype: "number"}, {field: "Shipping Cost", title: "Cost", value: "sum", ftype: "currency"}]}, handler: function(data) { return data.filter(d => d.Country!="United States");
 } });
-tables.table3 = tb3opts;
 
-var tb4opts = _.assign(_.create(toptions), {table: "#table4", filter: {rows: ["Carrier"], columns: [{field: "Order Name", title: "Orders", value: "count", ftype: "number"}, {field: "Shipping Cost", title: "Cost", value: "sum", ftype: "currency"}]}, handler: function(data) { return data;
-} });
-tables.table4 = tb4opts;
-
-var tb5opts = _.assign(_.create(toptions), {table: "#table5", height: 300, filter: {rows: ["Billed Weight"], columns: [{field: "Order Name", title: "Orders", value: "percentage", ftype: "percentage"}, {field: "Shipping Cost", title: "Cost", value: "sum", ftype: "currency"}]}, handler: function(data) { 
-data = data.reduce((acc, dt) => (
-w = dt["Billed Weight"].split(" "), dt.wi = w[0] = Math.ceil(parseInt(w[0])), dt["Billed Weight"] = w.join(" "), acc.push(dt), acc), []);
+var tb4opts = _.assign(_.create(toptions), {table: "#table4", height: 300, filter: {rows: ["Billed Weight"], columns: [{field: "Order Name", title: "Orders", value: "count", ftype: "number"}, {field: "Shipping Cost", title: "Cost", value: "sum", ftype: "currency"}]}, scolumns: ["Billed Weight","Carrier"], handler: function(data) {
 return data;
 } });
-tables.table5 = tb5opts;
+tables.push(...[tb2opts, tb3opts, tb4opts]);
 
-// toolbar2, toolbar3
-var t2tb = _.assign(_.create(tops), {table: "#table2", toolbar: "#toolbar2", scolumns: ["Zone","Country"], coptions:["refresh","fullscreen","pivot"]});
+// toolbars
+var tops = { get build() {
+var id = this.toolbar; 
+var html = Mustache.render(temp.toolbar.toolbar1, this); $(id).html(html);
+},
+get toptions() {
+var id = this.table; var ts = $(id).bootstrapTable('getOptions');
+return [{"name":"refresh","icon":"fas fa-redo", isbutton: true},{"name":"fullscreen","icon":"fas fa-expand", isbutton: true}, {"name":"expand","icon":"fas fa-angles-down", isbutton: true},
+{"name":"pivot","icon":"fas fa-object-ungroup", isgroup: true, type:"select", multiple: false, get values() {
+var scols = ts.scolumns;
+return (scols!=undefined) ? scols.map(v => v={label: v, value: v, selected: ts.filter.rows[0]==
+v}) : []; }},
+{name: "show-column", icon:"fas fa-columns", isgroup: true, type:"select", multiple: true, get scolumns() { return getOptions("visibleColumns",  $("#table1"));
+}, get values() {
+var scols = this.scolumns;
+return columns.map(v => v={label: v.title, value: v.field, selected: scols.includes(v.field)}); }},
+{name: "group-column", icon: "fas fa-th-list", isgroup: true, type:"select", multiple: true, get scolumns() {
+return getOptions("groupColumns",  $("#table1"));
+}, get values() {
+var scols = this.scolumns;
+return columns.map(v => v={label: v.title, value: v.field, selected: scols.includes(v.field)}); }} ]
+},
+get options() {
+var options = (this.coptions!=undefined) ? this.toptions.filter(op => this.coptions.includes(op.name)) : this.toptions;
+return options;
+}}
+
+var toolbars = [];
+var t1tb = _.assign(_.create(tops), {table: "#table1", toolbar: "#toolbar1", coptions: ["refresh","expand","fullscreen","show-column","group-column"]});
+
+// toolbar4
+var t4tb = _.extend(_.create(tops), {table: "#table4", toolbar: "#toolbar4", coptions:["refresh","fullscreen","pivot"]});
+toolbars.push(...[t1tb, t4tb]);
 
 // CHARTS
 // ChartData
-function ChartData(data, groupBy, key, value) {
+function ChartData(data, groupBy, value) {
 var cdata = _.groupBy(data, groupBy);
-var tt = _.values(cdata).flat().length;
+result.val(JSON.stringify(cdata));
+var tt = data.length;
 var percentage = _.values(cdata).map(cd => cd.length/tt*100);
-cdata = {labels:  _.keys(cdata).map(k=>k), datasets: [{data: _.values(cdata).map((cd,i) => cd.length), percentage: percentage, backgroundColor: fcolors.slice(this.data.length)}]
+cdata = {labels:  _.keys(cdata), datasets: [{data: _.values(cdata).map((cd, i) => cd.length), percentage: percentage, backgroundColor: fcolors.slice(this.data.length)}]
 }; 
-
 return cdata;
 }
 
-// chart2
+// coptions
+var charts = [];
 var coptions = {type: 'doughnut', responsive: true,
 options: {cutout: "70%", plugins: {legend: {display: false}
 }},
-get data() {
+get data() { 
 return ChartData(this.handler(this.source), ...this.filter);
 }, 
 get build() { 
 var id = this.chart; 
-// $(`${id}-card`).find(".chart-container").attr("style","width:130px;");
+if (this.style!=undefined)
+$(id).parents(".chart-container").attr("style", this.style);
 var chart = new Chart($(id).get(0), _.pick(this, "type", "data", "options"));
 }}; 
 
+//chart2
 var c2opts = _.assign(_.create(coptions), {chart: "#chart2", handler: function(data) { 
-return data.filter(d => d.Zone!=null) ;}, filter: [ "Zone", "Shipment Date", "Shipping Cost"]});
+return data.filter(d => d.Zone!=null) ;}, filter: [ "Zone", "Shipping Cost"]});
 
 //chart3
 var c3opts = _.assign(_.create(coptions), {chart: "#chart3", handler: function(data) { 
 return data.filter(d => d.Country!="United States");
-}, filter: [ "Country", "Shipment Date", "Shipping Cost"]});
+}, filter: [ "Country", "Shipping Cost"]});
 
+//chart4
+var c4opts = _.assign(_.create(coptions), {chart: "#chart4", style:"width:50%;", handler: function(data) { 
+return data; }, filter: [ "Billed Weight", "Shipping Cost"]});
+charts.push(...[c2opts, c3opts, c4opts]);
 
 //* START
 $(document).ready(function () {
 // Chart.register(ChartDataLabels);
-
-// $("#table2,#table3").bootstrapTable();
 GetData({}, "initial", table1);
 });
 
 // table1: GetData
 function GetData(fdata, action, table1) {
-OpenLoading("open");
-
 var foptions;
 switch (action) {
 case "initial":
+OpenLoading("static", {title: "Data is loading"});
 foptions = data.fparams;
 break;
 case "update":
+OpenLoading("open", {title: "Data is loading"});
 foptions = _.extend(data.fparams, {filter: fdata});
 foptions = GetOptions(foptions);
 break;
@@ -21562,27 +21461,31 @@ return foptions;
 
 google.script.run.withSuccessHandler(
 function(res) {
-OpenLoading("close");
 tb1opts = _.extend(tb1opts, {source: res});
-table1.bootstrapTable(tb1opts).then(table1.trigger(action, [res]));
+table1.bootstrapTable(tb1opts);
+table1.trigger(action, [res]);
+OpenLoading("close");
  }).Request(foptions);
  }
 
 // EVENTS
 // table1: initial
 table1.on("initial", function (e, data) {
-data = $(this).bootstrapTable("getData");
 	ftb.build; t1tb.build;
-	_.pairs(tables).forEach(([tn, tb]) => {
-	var id = tb.table;
-	$(id).bootstrapTable(tb.build(data));
+	tables.forEach((tb, ti) => {
+	var id = tb.table; tb.source = data;
+	$(id).bootstrapTable(tb);
 	});
-	t2tb.build;
-	_.extend(c2opts, {source: data}).build; // chart2
-	_.extend(c3opts, {source: data}).build; // chart3
+	
+	toolbars.forEach((tt, ti) => {
+	var id = tt.toolbar; tt.source = data; tt.build;
+	});
 
-OpenLoading("close"); 
-$(":checkbox, .search").on('change', function() {
+	charts.forEach((cc, ti) => {
+	var id = cc.chart; cc.source = data; cc.build;
+	});
+
+$(":radio, :checkbox, .search").on('change', function() {
 	var dn = ($(this).hasClass("all")) ? $(this).attr("data-target") : $(this).attr("name");
 	var id = $(this).attr("data-table");
 	$(id).trigger("format", [dn, $(this)]);
@@ -21609,7 +21512,7 @@ var type = (name.includes("filter")) ? "filter" : name;
 switch (type) {
 case "loading":
 var id = $(this).attr("id");
-OpenLoading("open", [`#${id}-card`]);
+OpenLoading("open", {}, [`#${id}-card`]);
 var utbs = t1tb.options.filter(td => td.type=="select"); 
 utbs.forEach(utb => { utb.scols = $(this);
 $(`input[name='${utb.name}']`).each(function() {	
@@ -21617,7 +21520,7 @@ var val = $(this).val();
 $(this).prop("checked",utb.scolumns.includes(val));
 });
 });
-OpenLoading("close", [`#${id}-card`]);
+OpenLoading("close", {}, [`#${id}-card`]);
 break;
 
 case "search":
@@ -21669,7 +21572,10 @@ $(this).bootstrapTable('resetView', {height: ops.height});
 break;
 
 case "pivot":
-modal2.modal("show");
+var nops = _.values(tables).find(tb=>tb.table==ops.table);
+var row = el.val(); nops.filter.rows = [row]; 
+nops = _.extend(nops, {filter: nops.filter});
+$(this).bootstrapTable("refreshOptions", nops);
 break;
 
 case "show-column":
@@ -21711,15 +21617,20 @@ GetData(fdata, "update", $(target));
 
 
 // OpenLoading
-function OpenLoading(action, cards) {
+function OpenLoading(action, options, cards) {
 var ids = (cards!=undefined) ? cards.join(", ") : "";
 switch (action) {
+	case "static":
+	modal.trigger("update", {type: "static", title: "Data will be loaded soon!"});
+	break;
 	case "open":
-	modal.trigger("update", ["loading data..."]);
-	$(`${ids} .fixed-table-loading`).filter(':not(.open)').toggleClass("open");
+	modal.trigger("update", {type: "open", title: "loading..."});
+	$(`${ids} .fixed-table-loading`)
+	.filter(':not(.open)').toggleClass("open");
 	$(`${ids} .main`).toggleClass("opacity-50");
 	break;
 	case "close":
+	modal.trigger("update", {type: "close"});
 	$(`${ids} .fixed-table-loading`)
 	.filter('.open').removeClass("open");
 	$(`${ids} .main`).removeClass("opacity-50");
@@ -21728,15 +21639,60 @@ switch (action) {
 }
 
 // modal: update
-modal.on("update", function (e, message, options) {
-var tt = $(this).find(".modal-title");
+$(".progress-bar").on("update", function(e, v) {
+$(this).attr("style",`width: ${v}%`);
+});
+
+modal.on("update", function (e, options, callback) {
+var tt = $(this).find(".modal-title"); 
 var bd = $(this).find(".modal-body");
-tt.text(message);
+var pg = $(this).find(".progress-bar");
+
+var type = options.type ?? "update";
+["title","body","html", "progress"].forEach(op => {
+var v = options[op];
+if (v != undefined)
+(op=="html") ? bd.html(v) : 
+(op=="progress") ? pg.attr("style",`width: ${v}%`) : 
+$(this).find(`.modal-${op}`).text(v);
+});
+
+const range = (start, end, step) => {
+return Array.from(Array.from(Array(Math.ceil((end-start)/step)).keys()), x => start+ x*step);
+}
+    
+var loop = function(el, val) {
+var nums = range(20, 100, 20);
+result.val(nums);
+    nums.forEach(num => {
+	setInterval(function() { 
+	pg.attr("style",`width: ${num}%;`);
+	}, 1000);
+    });
+}
+
+switch (type) {
+case "open":
 modal.modal("show");
 setTimeout(() => {
-	modal.modal("hide");
-	}, 2000);
- });
+modal.modal("hide");
+}, 2000);
+break;
+case "static":
+$("#overlay").css({"display":"block"});
+modal.css({"display":"block"});
+modal.modal("show");
+loop(pg, 20);
+break;
+case "update":
+break;
+case "close":
+$("#overlay").css({"display":"none"});
+loop.done(modal.modal("hide"));
+break;
+}
+});
+
 </script>
 
 </body>
