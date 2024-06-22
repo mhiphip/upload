@@ -20187,7 +20187,7 @@ html:not(.layout-footer-fixed) .content-wrapper {
 body {
 background-color: #e0eec5;
 }
- 
+
 main {
  padding: 20px;
 }
@@ -20430,7 +20430,7 @@ padding: 5px;
 			</div>
 			</div>
 			
-                        <div class="table main">
+                       <div class="table main" style="table-layout: fixed; width: 100%;">  
                         <table id="table4">
 	                  </table>
                         </div>
@@ -20440,8 +20440,8 @@ padding: 5px;
                           <div class="text-center">
                           </div>
                         </div>
-                          <div class="d-flex w-100 flex-wrap align-items-center justify-content-center gap-2">                                                
-                <div class="chart-container" style="position: relative;">
+          <div class="d-flex w-100 flex-wrap align-items-center justify-content-center gap-2">                                                
+          <div class="chart-container" style="position: relative;">
     <canvas id="chart4"></canvas>            
 	        </div>  
 	              </div> 
@@ -20455,7 +20455,7 @@ padding: 5px;
                             </div>
                             <div class="d-flex flex-column">
                               <small class="p-title">-</small>
-                              <h6 class="p-value">-</h6>
+                              <h5 class="p-value">-</h5>
                             </div>
                           </div>
                           <div class="d-flex">
@@ -20464,7 +20464,7 @@ padding: 5px;
                             </div>
                             <div class="d-flex flex-column">
                               <small class="p-title">-</small>
-                              <h6 class="p-value">-</h6>
+                              <h5 class="p-value">-</h5>
                             </div>
                           </div>
                         </div>
@@ -20722,10 +20722,9 @@ toolbars: {toolbar: "#toolbar1", coptions: ["refresh","expand","fullscreen","sho
 onPostBody: function(data) {
 	var id = this.table; 
 	var toolbars = this.toolbars;
-	if (toolbars!=undefined && 
-	toolbars.isbuild==undefined) { // toolbar
+	if (toolbars!=undefined) { // toolbar
 	this.toolbars = _.extend(_.create(tops), {table: id, isbuild: true}, toolbars);
-	this.toolbars.build;
+	this.toolbars.build();
 	}
 }};
 
@@ -20877,11 +20876,9 @@ onPostBody: function(data) {
 	var cols = this.filter.columns;
 	var toolbars = this.toolbars;
 	
-	if (toolbars!=undefined && 
-	toolbars.isbuild==undefined) { // toolbar
-	this.toolbars = _.extend(_.create(tops), {table: id, isbuild: true}, toolbars);
-	this.toolbars.build();
-	}
+	if (toolbars!=undefined) // toolbar
+	this.toolbars = _.extend(_.create(tops), {table: id, isbuild: true}, toolbars),
+	 tid = toolbars.toolbar, $(tid).data("options", this.toolbars), this.toolbars.build();
 	
 	if (info!=undefined) { // set info
 	_.pairs(info).forEach(([n, v]) => {
@@ -20890,8 +20887,9 @@ onPostBody: function(data) {
        }
        
 	if (tts.length >0) // set total
-	cols.map((col, i) => {
-	var v =  data.length>0 ? format(pformat(data, {field:col.field, pivot_value:"sum"}), col.column_type, col.format_type) : 0; tts.eq(i).text(v);
+	cols.forEach((col, i) => {
+	let v =  data.length>0 ? format(pformat(data, {field:col.field, pivot_value:"sum"}), col.column_type, col.format_type) : 0;
+	tts.eq(i).text(v);
 	});
        }
 };
@@ -20902,7 +20900,7 @@ filter: {rows: [{"field":"Zone","title":"Zone"}], columns: [{field: "Order Name"
 return data.filter(d => d.Zone!=null);
 },
 information: {title: "Domestic Data (Zone)", description: ""}, 
-"toolbars": {toolbar: "#toolbar2", coptions: ["fullscreen"]}
+toolbars: {toolbar: "#toolbar2", coptions: ["fullscreen"]}
 });
 
 
@@ -20910,11 +20908,11 @@ var tb3opts = _.assign(_.create(toptions), {table: "#table3", height: 300, sortB
 filter: {rows: [{field: "Country"}], columns: [{field: "Order Name", title: "Orders", pivot_value: "count", column_type: "number"}, {field: "Shipping Cost", title: "Cost", pivot_value: "sum", column_type:"number", format_type: "currency"}]}, handler: function(data) { return data.filter(d => d.Country!="United States");
 },
 information: {title: "International (Country)", description: ""}, 
-"toolbars": {toolbar: "#toolbar3", coptions: ["fullscreen"]}
+toolbars: {toolbar: "#toolbar3", coptions: ["fullscreen"]}
 });
 
 // table4
-var tb4opts = {table: "#table4", height: 450, sortBy: 'Order Name',
+var tb4opts = {table: "#table4", sortBy: 'Order Name',
 filter: {rows: [{field:"Billed Weight", title:"Billed Weight", group_format:true}], columns: [{field: "Order Name", title: "Orders", pivot_value: "count", column_type: "number"}, {field: "Shipping Cost", title: "Cost", pivot_value: "sum", column_type:"number", format_type: "currency"}]},
 handler: function(data) {
 data.forEach((d,i) => {
@@ -20922,8 +20920,10 @@ this.filter.rows.forEach(r =>
 _.extend(d, checkfd(d[r.field], r.field)) );
 }); return data; },
 information: {title: "Pivot Table", description: ""}, 
-"toolbars": {toolbar: "#toolbar4", coptions: ["refresh","fullscreen","pivot"]},
-classes: "table table-borderless mb-0", 
+toolbars: {toolbar: "#toolbar4", coptions: ["refresh","fullscreen","pivot"]},
+
+classes: "table table-borderless mb-0",  headerStyle: function(column) {return {classes: "text-wrap text-break", css: {"max-width": '20px'}} }, 
+pagination: true, pageSize: 5, paginationParts: ["pageList"],
 get data() {
 var source = this.handler(this.source);
 var filter = this.filter;
@@ -20948,7 +20948,8 @@ var cols = _.pairs(filter).reduce((acc, [t, arr]) => (
 arr.forEach(r => r.ptype = t), acc = [...acc, ...arr], acc), []);
 
 cols = cols.map(fc => {
-fc.title = (fc.pivot_value!=undefined) ? `${fc.title} (${fc.pivot_value})` : fc.title;
+c = _.findWhere(columns,{field: fc.field});
+fc.title = (fc.pivot_value!=undefined) ? `${c.title}<br>(${fc.pivot_value})` : fc.title;
 fc.formatter = function(v,r,i) {
 var nr = _.create(r); var nv;
 var tm = temp.table1[fc.field] ?? temp.table1.rows;
@@ -20959,7 +20960,7 @@ var test = !_.isNull(v) && !_.isUndefined(v);
 	var field = fc.field;
 	nr[field] = fc.column_type!=undefined ? format(v, fc.column_type, fc.format_type) : v;
 	 _.extend(nr, r, checkfd(r[field], field));
-	 _.extend(nr, {field: field, value: nr[field] ?? "-"});
+	 _.extend(nr, {field: field, value: nr[field]});
 	nv = Mustache.render(tm, nr);
 	break;
 	case "columns":
@@ -20973,22 +20974,34 @@ return fc;
 return cols;
 },
 onPostBody: function(data) {
+let ht = $("#table4").parent();
+result.val(ht.html());
 	var id = this.table; var info = this.information;
 	var pr = $(id).parents(".card"); 
 	var cols = this.filter.columns;
 	var toolbars = this.toolbars;
 	
-	if (toolbars!=undefined && 
-	toolbars.isbuild==undefined) { // toolbar
-	this.toolbars = _.extend(_.create(tops), {table: id, isbuild: true}, toolbars);
-	this.toolbars.build();
-	}
+	if (toolbars!=undefined) // toolbar
+	this.toolbars = _.extend(_.create(tops), {table: id, isbuild: true}, toolbars),
+	 tid = toolbars.toolbar, $(tid).data("options", this.toolbars), this.toolbars.build();	
 
    var charts = this.charts;   
-   if (charts!=undefined&& charts.isbuild==undefined) { // toolbar
-      	this.charts.isbuild = true;
-      	this.charts.charts.forEach(ch => ch.build());
+   if (charts.isbuild==undefined) { // chart
+       this.charts.isbuild = true;
+      	this.charts.charts.forEach(ch => {
+      	let id = ch.chart; 
+      	$(id).data("options", ch);
+      	ch.build();
+      	});
    }
+       if (charts.update)
+       this.charts.update = false, 
+       this.charts.charts.forEach(ch => {
+      	let id = ch.chart; let och = $(id).data("options");
+      	ch = _.extend(_.create(och), ch);
+      	ch.update();
+      	});
+   
 	var tts = pr.find(".p-title"); 	
 	var vvs = pr.find(".p-value");
 	let dt = _.pluck(data, "data").flat();
@@ -21005,7 +21018,7 @@ onPostBody: function(data) {
 // CHARTS
 // coptions
 var coptions = {type: 'doughnut', responsive: false,
-options: {layout: {padding: {left:30,right:30,top: 30,bottom:30}}, cutout: "70%", borderRadius: 3, plugins: {legend: {display: false}, 
+options: {layout: {padding: {left:40,right:40,top: 40,bottom:40}}, cutout: "50%", borderRadius: 3, plugins: {legend: {display: false}, 
 tooltip: {
 callbacks: {label: function(context) {             
    var label = context.chart.data.
@@ -21015,12 +21028,12 @@ callbacks: {label: function(context) {
           return `${label}: ${value}`;
     }
 }},
-datalabels: {anchor:'end', offset:25, formatter: function(value, context) {
+datalabels: {anchor:'end', offset: 30, formatter: function(value, context) {
 return context.chart.data.labels[context.dataIndex];
 }, color: function(context) {
 var value = context.dataset.
 backgroundColor[context.dataIndex];
-return "black"}, font: {size: '15', weight:"bold"}},
+return "gray";}, backgroundColor: 'white', font: {size: '15', weight:"bold"}},
 doughnutLabel: {labels: [{text: function(myChart) {
 var data = myChart.config.data.datasets[0].data;
 return myChart.config.data.title;
@@ -21030,17 +21043,19 @@ return myChart.config.data.title;
 handler: function(tdata) {
 var filter = this.filter; var f = "Shipping Cost";
 var sdata = tdata.map(arr => sum = _.pluck(arr.data, f).reduce((a,b)=>+a + +b) ).filter((d,i)=>i<=4);
-var total = sdata.reduce((a,b)=>a+b);
-var pc;
-var pdata = sdata.map(d => (
-p = d/total*100, pc = (p>=70) ? p-70 : pc, 
-d = (p>=70) ? p-pc : (pc!=undefined) ? p+pc/4 : p,
-Math.ceil(d) ));
-var cdata = {title: filter.label, value: filter.value, labels:  _.pluck(tdata, filter.label), sdata: sdata, datasets: [{data: pdata, backgroundColor: _.pluck(tdata, "color")}]};
+
+var total = sdata.reduce((a,b)=>+a+ +b);
+var pdata = sdata.map(d => p = +d/total*100);
+pdata = pdata.map(p => ((p,i) = (m = p/pdata[i+1],
+p = (m>=9) ? p/10 : p, p = Math.ceil(p), p));
+result.val(JSON.stringify(pdata));
+
+var cdata = {title: filter.label, value: filter.value, labels:  _.pluck(tdata, filter.label), sdata: sdata, datasets: [{data: sdata, backgroundColor: _.pluck(tdata, "color")}]};
 return cdata;
 },
 build: function() { 
-let tb = this.table; let tdata = $(tb).bootstrapTable("getData");
+let tb = this.table; 
+let tdata = $(tb).bootstrapTable("getData");
 
 this.data = this.handler(tdata);
 var id = this.chart; var ct = $(id).parents(".chart-container"); 
@@ -21048,11 +21063,10 @@ if (this.style!=undefined) ct.attr("style", this.style);
 var chart = new Chart($(id).get(0), _.pick(this, "type", "data", "options")); 
 },
 update: function() { 
-let tb = this.table; let ops = $(tb).bootstrapTable("getOptions");
+let tb = this.table; let tdata = $(tb).bootstrapTable("getData"); 
+let ops = $(tb).bootstrapTable("getOptions"); 
 this.filter.label = ops.filter.rows[0].field;
-this.data = this.handler(ops.data);
-
-result.val(JSON.stringify(this.data));
+this.data = this.handler(tdata);
 
 var id = this.chart; cid = $(id).attr("id");
 var ct = $(id).parents(".chart-container"); 
@@ -21061,10 +21075,8 @@ ch.data = this.data; ch.options = this.options; ch.update();
 }}; 
 
 //chart4
-var c4opts = _.assign(_.create(coptions), {chart: "#chart4", table: "#table4", 
-style:"width:70%;", filter: {label: "Billed Weight", data: "Order Name"} });
-
-tb4opts.charts.charts = [c4opts];
+var c4opts = _.assign(_.create(coptions), {chart: "#chart4", table: "#table4", style:"width:90%;", filter: {label: "Billed Weight", data: "Order Name"} });
+tb4opts.charts = {charts: [c4opts]};
 tables.push(...[tb2opts, tb3opts, tb4opts]);
 
 $(document).ready(function () {
@@ -21107,8 +21119,8 @@ return foptions;
 
 google.script.run.withSuccessHandler(
 function(res) {
-OpenLoading("close");
 table1.trigger(action, [res]);
+OpenLoading("close");
  }).Request(foptions);
  }
 
@@ -21118,8 +21130,8 @@ table1.on("initial", function (e, data) {
 tb1opts = _.extend(tb1opts, {source: data});
 table1.bootstrapTable(tb1opts);
 ftb.build;
-// 
-  tables.forEach((tb, ti) => {
+
+ tables.forEach((tb, ti) => {
 	var id = tb.table; tb.source = data;
 	$(id).bootstrapTable(tb);
    });
@@ -21128,18 +21140,14 @@ ftb.build;
 // table1: update
 table1.on("update", function (e, data) {
 var ops = $(this).bootstrapTable('getOptions');
-ops = _.assign(_.create(tb1opts), {source: data});
+ops = _.assign(_.create(tb1opts), ops, {source: data});
 $(this).bootstrapTable('refreshOptions', ops);
 
 tables.forEach((tb, ti) => {
 var id = tb.table; var to = $(id).bootstrapTable('getOptions');
-to = _.assign(_.create(tb), {source: data, filter: ops.filter});
-$(id).bootstrapTable('refreshOptions', to);
 
-setTimeout(() => {
- if (to.toolbars!=undefined) to.toolbars.build();
- if (to.charts!=undefined) to.charts[0].update();
-}, 500);
+to = _.assign(_.create(tb), to, {filter: to.filter, pageNumber: 1, source: data, charts: _.assign(to.charts, {update: true})});
+$(id).bootstrapTable('refreshOptions', to);
 });
 });
 
@@ -21206,7 +21214,7 @@ OpenLoading("close");
 break;
 
 case "pivot": // pivott
-// assign nested object
+
 const set = (obj, keys, val) => {
 const lastKey = _.last(keys); 
 const sKeys = (_.isNumber(val)||_.isString(val)) ? keys : keys.toSpliced(-1);
@@ -21236,13 +21244,8 @@ c = _.findWhere(columns,{field: o.field}),
 p = _.findWhere(foptions.pivot, {pivot_value: o.pivot_value}),
 nc = _.extend({}, c, p), nc)), acc[k]=r, acc), {});
 
-ops = _.assign(_.create(tb), ops,{source:ops.source, filter: pops});
+ops = _.assign(_.create(tb), ops, {pageNumber: 1, filter: pops, charts: _.assign(ops.charts, {update: true})});
 $(this).bootstrapTable("refreshOptions", ops);
-
-setTimeout(() => {
- if (tb.toolbars!=undefined) tb.toolbars.build();
- if (tb.charts!=undefined) tb.charts.update();
-}, 500);
 break;
 
 case "show-column":
